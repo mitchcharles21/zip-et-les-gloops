@@ -32,3 +32,6 @@ Jeu éducatif gratuit, bilingue (français / anglais), pour les enfants de 5 à 
 **Jouer :** https://mitchcharles21.github.io/zip-et-les-gloops/
 
 Les voix dépendent de l'appareil : utilise Safari ou Chrome. La musique et la voix se coupent séparément avec le bouton 🎵 en haut à droite. La progression est enregistrée sur l'appareil.
+
+## Credits
+Planet, Moon and Sun pictures are rendered from the public planet surface maps in [threex.planets](https://github.com/jeromeetienne/threex.planets) (NASA-derived textures).
