@@ -1,6 +1,6 @@
 
 /* ---------------------------------------------------------------- 1st-grade skills, menu meta, path text */
-const APP_VERSION = '2026-11-18.25';
+const APP_VERSION = '2026-11-18.26';
 const G1 = ['sub', 'compare', 'clock', 'shapes', 'pattern', 'sight', 'syl', 'rhyme'];
 const MODES_G1 = G1;
 const MODES_ALL = MODES7.concat(G1, ['geo', 'hunt', 'planets']);

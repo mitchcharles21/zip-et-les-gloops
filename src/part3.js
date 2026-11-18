@@ -1130,12 +1130,13 @@ function raceQuestion(k, delay) {
   const id = race.id;
   setTimeout(() => { if (race.active && race.id === id && race.k === k) Voice.say(q.say); }, delay);
 }
-function raceLane(l) {
+function raceLane(l, hold) {
   if (!race.active || race.st === 'finish' || race.st === 'done') return;
-  race.lane = clamp(l, 0, 2); Snd.click();
-  const gt = race.gates[race.k]; if (gt) gt.committed = true;
+  const nl = clamp(l, 0, 2); if (nl !== race.lane || !hold) Snd.click(); race.lane = nl;
+  const gt = race.gates[race.k]; if (gt && !hold) gt.committed = true;
 }
-function raceTap(x) { const G = raceGeom(); raceLane(Math.floor((x - G.x0) / G.laneW)); }
+function raceTap(x, hold) { const G = raceGeom(); raceLane(Math.floor((x - G.x0) / G.laneW), hold); }
+function raceCommit() { const gt = race.active && race.gates[race.k]; if (gt) gt.committed = true; }
 function racePass(gt) {
   gt.lane = race.lane; const o = gt.opts[race.lane], ok = o.val === gt.q.ans; gt.res = ok; race.k++; S.round.n++;
   const G = raceGeom(), x = car.x, y = G.carY - 80;
@@ -1690,9 +1691,12 @@ function tickFrame(now) {
 
 document.addEventListener('keydown', (e) => { if (S.screen === 'play' && S.mode === 'race') { if (e.key === 'ArrowLeft') raceLane(race.lane - 1); else if (e.key === 'ArrowRight') raceLane(race.lane + 1); else if (e.key === ' ' || e.key === 'Enter') raceLane(race.lane); } });
 /* ---------------------------------------------------------------- input */
+let raceDrag = false;
+cv.addEventListener('pointermove', (e) => { if (raceDrag && S.screen === 'play' && S.mode === 'race' && race.st === 'run') raceTap(e.clientX, true); });
+window.addEventListener('pointerup', () => { if (raceDrag && S.screen === 'play' && S.mode === 'race' && race.st === 'run') raceCommit(); raceDrag = false; }); window.addEventListener('pointercancel', () => { raceDrag = false; });
 cv.addEventListener('pointerdown', (e) => {
   Snd.unlock();
-  if (S.screen === 'play' && S.mode === 'race') { raceTap(e.clientX); return; }
+  if (S.screen === 'play' && S.mode === 'race') { raceDrag = true; raceTap(e.clientX, true); return; }
   if (S.screen !== 'play' || !S.canTap) return;
   S.idle = 0;
   if (kindNow() === 'detect') { det.down = true; det.touched = true; det.moved = 0; det.sx = e.clientX; det.sy = e.clientY; det.tx = e.clientX; det.ty = e.clientY - 48; return; }
