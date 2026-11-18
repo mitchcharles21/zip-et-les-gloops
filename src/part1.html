@@ -203,9 +203,9 @@ button.chip:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--ink);
 #shop-tabs { display: flex; gap: 6px; }
 #shop-tabs button { width: 52px; height: 48px; border: 4px solid var(--ink); border-radius: 16px; background: #fff; font-size: 24px; box-shadow: 0 4px 0 var(--ink); padding: 0; }
 #shop-tabs button[aria-pressed="true"] { background: var(--grape); box-shadow: 0 1px 0 var(--ink); transform: translateY(3px); }
-#shop-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: 100%; overflow-y: auto; min-height: 0; flex: 1; padding: 2px; box-sizing: border-box; }
-.item { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; min-height: 92px; padding: 6px 4px; border: 4px solid var(--ink); border-radius: 18px; background: #fff; font-weight: 600; font-size: 14px; line-height: 1.1; box-sizing: border-box; }
-.item .ic { font-size: 34px; line-height: 1.1; } .item .sw { width: 36px; height: 36px; border-radius: 50%; border: 4px solid var(--ink); box-sizing: border-box; }
+#shop-grid { touch-action: pan-y; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; align-content: start; display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: 100%; overflow-y: auto; min-height: 0; flex: 1; padding: 2px; box-sizing: border-box; }
+.item { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; min-height: 78px; padding: 5px 4px; border: 4px solid var(--ink); border-radius: 18px; background: #fff; font-weight: 600; font-size: 14px; line-height: 1.1; box-sizing: border-box; }
+.item .ic { font-size: 34px; line-height: 1.1; } .item .dot { flex: none; width: 30px; height: 30px; min-height: 30px; border-radius: 50%; border: 4px solid var(--ink); box-sizing: border-box; }
 .item .pr { font-weight: 700; font-size: 16px; background: var(--sun); border-radius: 10px; padding: 0 8px; margin-top: 2px; }
 .item.owned .pr { background: #d9f7e8; } .item.eq { background: #fff3c4; box-shadow: 0 0 0 4px var(--grape); }
 .item.shake { animation: shk .4s; }

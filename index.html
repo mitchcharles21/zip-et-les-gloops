@@ -216,9 +216,9 @@ button.chip:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--ink);
 #shop-tabs { display: flex; gap: 6px; }
 #shop-tabs button { width: 52px; height: 48px; border: 4px solid var(--ink); border-radius: 16px; background: #fff; font-size: 24px; box-shadow: 0 4px 0 var(--ink); padding: 0; }
 #shop-tabs button[aria-pressed="true"] { background: var(--grape); box-shadow: 0 1px 0 var(--ink); transform: translateY(3px); }
-#shop-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: 100%; overflow-y: auto; min-height: 0; flex: 1; padding: 2px; box-sizing: border-box; }
-.item { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; min-height: 92px; padding: 6px 4px; border: 4px solid var(--ink); border-radius: 18px; background: #fff; font-weight: 600; font-size: 14px; line-height: 1.1; box-sizing: border-box; }
-.item .ic { font-size: 34px; line-height: 1.1; } .item .sw { width: 36px; height: 36px; border-radius: 50%; border: 4px solid var(--ink); box-sizing: border-box; }
+#shop-grid { touch-action: pan-y; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; align-content: start; display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: 100%; overflow-y: auto; min-height: 0; flex: 1; padding: 2px; box-sizing: border-box; }
+.item { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; min-height: 78px; padding: 5px 4px; border: 4px solid var(--ink); border-radius: 18px; background: #fff; font-weight: 600; font-size: 14px; line-height: 1.1; box-sizing: border-box; }
+.item .ic { font-size: 34px; line-height: 1.1; } .item .dot { flex: none; width: 30px; height: 30px; min-height: 30px; border-radius: 50%; border: 4px solid var(--ink); box-sizing: border-box; }
 .item .pr { font-weight: 700; font-size: 16px; background: var(--sun); border-radius: 10px; padding: 0 8px; margin-top: 2px; }
 .item.owned .pr { background: #d9f7e8; } .item.eq { background: #fff3c4; box-shadow: 0 0 0 4px var(--grape); }
 .item.shake { animation: shk .4s; }
@@ -898,7 +898,7 @@ const Voice = (() => {
       if (!ok || primed) return; primed = true;
       try { const u = new SpeechSynthesisUtterance(' '); u.volume = 0; speechSynthesis.speak(u); } catch (e) { /* ignore */ }
     },
-    say(text, cb) {
+    say(text, cb, hooks) {
       if (!ok || !text || !Snd.voiceOn) { if (cb) setTimeout(cb, 0); return; }
       try {
         const busy = speechSynthesis.speaking || speechSynthesis.pending;
@@ -909,7 +909,8 @@ const Voice = (() => {
         u.lang = L === 'fr' ? 'fr-CA' : 'en-US';
         const v = pickVoice(L); if (v) { u.voice = v; u.lang = v.lang; }
         u.rate = 0.84; u.pitch = 1.12; u.volume = 1;
-        u.onstart = () => { Snd.duck(true); speakBtn.classList.add('talk'); };
+        u.onstart = () => { Snd.duck(true); speakBtn.classList.add('talk'); if (hooks && hooks.onstart) hooks.onstart(); };
+        if (hooks && hooks.onboundary) u.onboundary = (ev) => { if (ev && (ev.name === undefined || ev.name === 'word')) hooks.onboundary(ev.charIndex | 0); };
         u.onend = () => { if (utter === u) done(); if (cb) cb(); };
         u.onerror = (ev) => { if (utter === u) done(); if (ev && (ev.error === 'not-allowed' || ev.error === 'synthesis-unavailable' || ev.error === 'language-unavailable')) warn(); };
         const go = () => { try { speechSynthesis.speak(u); } catch (e) { done(); } };
@@ -1132,7 +1133,7 @@ const STORIES = [
 ];
 
 /* ---------------------------------------------------------------- 1st-grade skills, menu meta, path text */
-const APP_VERSION = '2026-11-18.9';
+const APP_VERSION = '2026-11-18.10';
 const G1 = ['sub', 'compare', 'clock', 'shapes', 'pattern', 'sight', 'syl', 'rhyme'];
 const MODES_G1 = G1;
 const MODES_ALL = MODES7.concat(G1, ['geo', 'hunt']);
@@ -2125,7 +2126,7 @@ function renderShop() {
   $('shop-tabs').innerHTML = Object.keys(TAB_IC).map((t) => `<button type="button" data-tab="${t}" aria-pressed="${t === shopTab}" aria-label="${UI[L]['tab_' + t]}">${TAB_IC[t]}</button>`).join('');
   $('shop-grid').innerHTML = SHOP[shopTab].map((it) => {
     const own = owned(shopTab, it), eq = save.shop.eq[shopTab] === it.id;
-    const pic = it.hex ? `<span class="sw" style="background:${it.hex}"></span>` : `<span class="ic">${it.ic}</span>`;
+    const pic = it.hex ? `<span class="dot" style="background:${it.hex}"></span>` : `<span class="ic">${it.ic}</span>`;
     return `<button type="button" class="item${own ? ' owned' : ''}${eq ? ' eq' : ''}" data-id="${it.id}">${pic}<span>${it[L]}</span><span class="pr">${eq ? (L === 'fr' ? 'Porté' : 'On') : own ? '✓' : it.p + ' ⭐'}</span></button>`;
   }).join('');
 }
@@ -2449,15 +2450,23 @@ function storyPage() {
 function narrate() {
   if (S.screen !== 'story' || STORY.view !== 'read') return;
   const tk = ++STORY.tk, ws = [...document.querySelectorAll('#story-text .w')]; if (!ws.length) return;
-  Voice.say(STORIES[STORY.idx].pages[STORY.page][L]);
-  let i = 0;
-  const step = () => {
-    if (tk !== STORY.tk) return;
-    ws.forEach((w, j) => w.classList.toggle('on', j === i));
-    if (i >= ws.length) return;
-    const len = ws[i].textContent.length; i++; setTimeout(step, 230 + 62 * len);
+  const text = STORIES[STORY.idx].pages[STORY.page][L], words = text.split(' ');
+  const starts = []; { let p = 0; for (const w of words) { starts.push(p); p += w.length + 1; } }
+  const light = (i) => ws.forEach((w, j) => w.classList.toggle('on', j === i));
+  let gotB = false, timerOn = false, i = 0;
+  const live = () => tk === STORY.tk;
+  const step = (fast) => {
+    if (!live() || gotB) return;
+    light(i); if (i >= ws.length) return;
+    const len = ws[i].textContent.length; i++; setTimeout(() => step(fast), fast ? 100 + 46 * len : 230 + 62 * len);
   };
-  step();
+  const startTimer = (fast) => { if (timerOn) return; timerOn = true; step(fast); };
+  if (!Voice.ok || !Snd.voiceOn) { startTimer(false); return; }
+  Voice.say(text, () => { if (live()) light(-1); }, {
+    onstart: () => startTimer(true),
+    onboundary: (ci) => { if (!live()) return; gotB = true; let k = 0; while (k + 1 < starts.length && starts[k + 1] <= ci) k++; light(k); }
+  });
+  setTimeout(() => startTimer(true), 1500);
 }
 function storyQuiz(qi) {
   STORY.tk++; STORY.qi = qi; STORY.tries = 0; storyView('quiz');

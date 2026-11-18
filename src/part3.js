@@ -742,7 +742,7 @@ function renderShop() {
   $('shop-tabs').innerHTML = Object.keys(TAB_IC).map((t) => `<button type="button" data-tab="${t}" aria-pressed="${t === shopTab}" aria-label="${UI[L]['tab_' + t]}">${TAB_IC[t]}</button>`).join('');
   $('shop-grid').innerHTML = SHOP[shopTab].map((it) => {
     const own = owned(shopTab, it), eq = save.shop.eq[shopTab] === it.id;
-    const pic = it.hex ? `<span class="sw" style="background:${it.hex}"></span>` : `<span class="ic">${it.ic}</span>`;
+    const pic = it.hex ? `<span class="dot" style="background:${it.hex}"></span>` : `<span class="ic">${it.ic}</span>`;
     return `<button type="button" class="item${own ? ' owned' : ''}${eq ? ' eq' : ''}" data-id="${it.id}">${pic}<span>${it[L]}</span><span class="pr">${eq ? (L === 'fr' ? 'Porté' : 'On') : own ? '✓' : it.p + ' ⭐'}</span></button>`;
   }).join('');
 }
@@ -1066,15 +1066,23 @@ function storyPage() {
 function narrate() {
   if (S.screen !== 'story' || STORY.view !== 'read') return;
   const tk = ++STORY.tk, ws = [...document.querySelectorAll('#story-text .w')]; if (!ws.length) return;
-  Voice.say(STORIES[STORY.idx].pages[STORY.page][L]);
-  let i = 0;
-  const step = () => {
-    if (tk !== STORY.tk) return;
-    ws.forEach((w, j) => w.classList.toggle('on', j === i));
-    if (i >= ws.length) return;
-    const len = ws[i].textContent.length; i++; setTimeout(step, 230 + 62 * len);
+  const text = STORIES[STORY.idx].pages[STORY.page][L], words = text.split(' ');
+  const starts = []; { let p = 0; for (const w of words) { starts.push(p); p += w.length + 1; } }
+  const light = (i) => ws.forEach((w, j) => w.classList.toggle('on', j === i));
+  let gotB = false, timerOn = false, i = 0;
+  const live = () => tk === STORY.tk;
+  const step = (fast) => {
+    if (!live() || gotB) return;
+    light(i); if (i >= ws.length) return;
+    const len = ws[i].textContent.length; i++; setTimeout(() => step(fast), fast ? 100 + 46 * len : 230 + 62 * len);
   };
-  step();
+  const startTimer = (fast) => { if (timerOn) return; timerOn = true; step(fast); };
+  if (!Voice.ok || !Snd.voiceOn) { startTimer(false); return; }
+  Voice.say(text, () => { if (live()) light(-1); }, {
+    onstart: () => startTimer(true),
+    onboundary: (ci) => { if (!live()) return; gotB = true; let k = 0; while (k + 1 < starts.length && starts[k + 1] <= ci) k++; light(k); }
+  });
+  setTimeout(() => startTimer(true), 1500);
 }
 function storyQuiz(qi) {
   STORY.tk++; STORY.qi = qi; STORY.tries = 0; storyView('quiz');

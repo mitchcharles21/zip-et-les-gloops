@@ -397,7 +397,7 @@ const Voice = (() => {
       if (!ok || primed) return; primed = true;
       try { const u = new SpeechSynthesisUtterance(' '); u.volume = 0; speechSynthesis.speak(u); } catch (e) { /* ignore */ }
     },
-    say(text, cb) {
+    say(text, cb, hooks) {
       if (!ok || !text || !Snd.voiceOn) { if (cb) setTimeout(cb, 0); return; }
       try {
         const busy = speechSynthesis.speaking || speechSynthesis.pending;
@@ -408,7 +408,8 @@ const Voice = (() => {
         u.lang = L === 'fr' ? 'fr-CA' : 'en-US';
         const v = pickVoice(L); if (v) { u.voice = v; u.lang = v.lang; }
         u.rate = 0.84; u.pitch = 1.12; u.volume = 1;
-        u.onstart = () => { Snd.duck(true); speakBtn.classList.add('talk'); };
+        u.onstart = () => { Snd.duck(true); speakBtn.classList.add('talk'); if (hooks && hooks.onstart) hooks.onstart(); };
+        if (hooks && hooks.onboundary) u.onboundary = (ev) => { if (ev && (ev.name === undefined || ev.name === 'word')) hooks.onboundary(ev.charIndex | 0); };
         u.onend = () => { if (utter === u) done(); if (cb) cb(); };
         u.onerror = (ev) => { if (utter === u) done(); if (ev && (ev.error === 'not-allowed' || ev.error === 'synthesis-unavailable' || ev.error === 'language-unavailable')) warn(); };
         const go = () => { try { speechSynthesis.speak(u); } catch (e) { done(); } };
