@@ -468,7 +468,7 @@ function show(name) {
   S.screen = name;
   for (const k in screens) screens[k].hidden = k !== name;
   const play = name === 'play';
-  $('prompt').hidden = !play; $('home').hidden = !play; $('stars').hidden = name === 'splash';
+  $('prompt').hidden = !play; $('home').hidden = !play; $('gear').hidden = name !== 'menu'; $('stars').hidden = name === 'splash';
   if (!play) { race.active = false; blobs = []; bubble = null; S.q = null; S.canTap = false; $('puzzle').hidden = true; P.active = false; }
   if (name !== 'story') STORY.tk++;
   setPal(play ? S.mode : 'menu');
@@ -1228,7 +1228,7 @@ async function checkUpdate() {
     } else el.textContent = UI[L].upd_ok;
   } catch (e) { el.textContent = UI[L].upd_fail; } finally { btn.disabled = false; }
 }
-$('settingsbtn').addEventListener('click', () => { Snd.unlock(); Snd.click(); openSettings(); });
+$('gear').addEventListener('click', () => { Snd.unlock(); Snd.click(); openSettings(); });
 $('st-music').addEventListener('click', () => { Snd.unlock(); Snd.setMusic(!Snd.on); Snd.click(); renderSettings(); sndSync(); });
 $('st-voice').addEventListener('click', () => { Snd.unlock(); const on = !Snd.voiceOn; Snd.setVoice(on); if (!on) Voice.stop(); Snd.click(); renderSettings(); sndSync(); if (on) Voice.say(L === 'fr' ? 'Salut !' : 'Hi!'); });
 $('st-update').addEventListener('click', () => { Snd.click(); checkUpdate(); });
