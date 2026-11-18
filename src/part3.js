@@ -1229,6 +1229,7 @@ $('settingsbtn').addEventListener('click', () => { Snd.unlock(); Snd.click(); op
 $('st-music').addEventListener('click', () => { Snd.unlock(); Snd.setMusic(!Snd.on); Snd.click(); renderSettings(); sndSync(); });
 $('st-voice').addEventListener('click', () => { Snd.unlock(); const on = !Snd.voiceOn; Snd.setVoice(on); if (!on) Voice.stop(); Snd.click(); renderSettings(); sndSync(); if (on) Voice.say(L === 'fr' ? 'Salut !' : 'Hi!'); });
 $('st-update').addEventListener('click', () => { Snd.click(); checkUpdate(); });
+$('st-claude').addEventListener('click', () => { Snd.unlock(); Snd.click(); if (!Snd.voiceOn) { Snd.setVoice(true); renderSettings(); sndSync(); } Voice.say(UI[L].claude_say); });
 $('st-back').addEventListener('click', () => { Snd.click(); goMenu(); });
 
 function tickFrame(now) {

@@ -1,6 +1,6 @@
 
 /* ---------------------------------------------------------------- 1st-grade skills, menu meta, path text */
-const APP_VERSION = '2026-11-18.2';
+const APP_VERSION = '2026-11-18.3';
 const G1 = ['sub', 'compare', 'clock', 'shapes', 'pattern', 'sight', 'syl', 'rhyme'];
 const MODES_G1 = G1;
 const MODES_ALL = MODES7.concat(G1, ['geo', 'hunt']);
@@ -29,11 +29,11 @@ const MODE_META = {
 const CAT_ORDER = { math: ['count', 'numbers', 'add', 'sub', 'compare', 'pattern', 'clock', 'shapes'], read: ['letters', 'first', 'place', 'sight', 'syl', 'rhyme'], fun: ['drive', 'race'], disc: ['colors', 'geo', 'hunt'] };
 Object.assign(UI.fr, {
   m_sub: 'Soustractions', m_compare: 'Plus ou moins', m_clock: 'L’heure', m_shapes: 'Les formes', m_pattern: 'Les suites', m_sight: 'Mots usuels', m_syl: 'Syllabes', m_rhyme: 'Les rimes', m_story: 'Histoire',
-  cat_math: 'Maths', cat_read: 'Lecture', cat_fun: 'Jeux', cat_disc: 'Découvrir', m_geo: 'Le monde', m_hunt: 'Chasse aux formes', settings: 'Réglages', upd_btn: 'Chercher une mise à jour', upd_checking: 'Vérification…', upd_ok: 'Le jeu est à jour ✓', upd_new: 'Nouvelle version ! Mise à jour…', upd_fail: 'Impossible de vérifier (pas de connexion ?)', upd_na: 'La mise à jour marche seulement sur le site web', ver: 'Version', st_updates: 'Mises à jour', st_sound: 'Son', play: 'Jouer', play_sub: 'Le parcours du jour', path_title: 'Le parcours de Zip', path_more: 'Un autre parcours', path_menu: 'Menu'
+  cat_math: 'Maths', cat_read: 'Lecture', cat_fun: 'Jeux', cat_disc: 'Découvrir', made_with: 'Fait avec Claude', claude_say: 'Salut ! C’est Claude. J’ai aidé à faire ce jeu pour toi. Amuse-toi bien !', m_geo: 'Le monde', m_hunt: 'Chasse aux formes', settings: 'Réglages', upd_btn: 'Chercher une mise à jour', upd_checking: 'Vérification…', upd_ok: 'Le jeu est à jour ✓', upd_new: 'Nouvelle version ! Mise à jour…', upd_fail: 'Impossible de vérifier (pas de connexion ?)', upd_na: 'La mise à jour marche seulement sur le site web', ver: 'Version', st_updates: 'Mises à jour', st_sound: 'Son', play: 'Jouer', play_sub: 'Le parcours du jour', path_title: 'Le parcours de Zip', path_more: 'Un autre parcours', path_menu: 'Menu'
 });
 Object.assign(UI.en, {
   m_sub: 'Subtracting', m_compare: 'More or less', m_clock: 'Clock', m_shapes: 'Shapes', m_pattern: 'Patterns', m_sight: 'Sight words', m_syl: 'Syllables', m_rhyme: 'Rhymes', m_story: 'Story',
-  cat_math: 'Math', cat_read: 'Reading', cat_fun: 'Games', cat_disc: 'Discover', m_geo: 'My world', m_hunt: 'Shape hunt', settings: 'Settings', upd_btn: 'Check for updates', upd_checking: 'Checking…', upd_ok: 'The game is up to date ✓', upd_new: 'New version! Updating…', upd_fail: 'Could not check (no connection?)', upd_na: 'Updates only work on the website', ver: 'Version', st_updates: 'Updates', st_sound: 'Sound', play: 'Play', play_sub: 'Today’s path', path_title: 'Zip’s path', path_more: 'Another path', path_menu: 'Menu'
+  cat_math: 'Math', cat_read: 'Reading', cat_fun: 'Games', cat_disc: 'Discover', made_with: 'Made with Claude', claude_say: 'Hi! It’s Claude. I helped make this game for you. Have fun!', m_geo: 'My world', m_hunt: 'Shape hunt', settings: 'Settings', upd_btn: 'Check for updates', upd_checking: 'Checking…', upd_ok: 'The game is up to date ✓', upd_new: 'New version! Updating…', upd_fail: 'Could not check (no connection?)', upd_na: 'Updates only work on the website', ver: 'Version', st_updates: 'Updates', st_sound: 'Sound', play: 'Play', play_sub: 'Today’s path', path_title: 'Zip’s path', path_more: 'Another path', path_menu: 'Menu'
 });
 const PX = {
   fr: { step: (n, t, name, d) => `Étape ${n} sur ${t} : ${name}. ${d} !`, nice: ['Bravo', 'Super', 'Génial', 'Bien joué'], done: `Parcours terminé ! Reviens demain pour un nouveau parcours !`, sub: (i, t) => i >= t ? 'Parcours terminé ✓' : `Étape ${i + 1} sur ${t}`, doneT: '🎉 Parcours terminé !', doneS: (s) => `+${s} ⭐` },
