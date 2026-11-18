@@ -475,7 +475,7 @@ function applyLang() {
   document.querySelectorAll('[data-ph]').forEach((el) => { el.placeholder = UI[L][el.dataset.ph]; });
   document.querySelectorAll('[data-i18n-aria]').forEach((el) => { el.setAttribute('aria-label', UI[L][el.dataset.i18nAria]); });
   $('l-fr').setAttribute('aria-pressed', String(L === 'fr')); $('l-en').setAttribute('aria-pressed', String(L === 'en'));
-  document.title = L === 'fr' ? 'Zip et les Gloops' : 'Zip & the Gloops';
+  document.title = L === 'fr' ? 'L’Académie de Zip' : 'Zip’s Academy';
   $('starn').textContent = balance();
   renderPips(); if (S.screen === 'album') renderAlbum(); if (S.screen === 'adv') renderAdv(S.advView); if (S.screen === 'trophy') Prog.render(); if (S.screen === 'shop') renderShop(); if (S.screen === 'story') storyList(); if (S.screen === 'path') renderPath(S.pathView, false); if (S.screen === 'cat') openCat(S.cat); if (S.screen === 'settings') renderSettings(); Prog.updateBtn();
 }

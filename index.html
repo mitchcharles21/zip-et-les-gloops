@@ -8,10 +8,10 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="description" content="Zip et les Gloops: a bilingual (French/English) learning game for kids / un jeu éducatif bilingue pour enfants">
+<meta name="description" content="L’Académie de Zip / Zip’s Academy: a bilingual (French/English) learning game for kids / un jeu éducatif bilingue pour enfants">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Ctext y=%27.9em%27 font-size=%2790%27%3E%F0%9F%AB%A7%3C/text%3E%3C/svg%3E">
 </head><body>
-<title>Zip et les Gloops</title>
+<title>L’Académie de Zip</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -109,6 +109,7 @@ button.chip:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--ink);
 @keyframes fadein { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
 .logo { margin: 0; text-align: center; font-size: clamp(44px, 13vw, 72px); line-height: .95; font-weight: 700; color: var(--sun);
   -webkit-text-stroke: 8px var(--ink); paint-order: stroke fill; text-shadow: 0 6px 0 var(--ink); letter-spacing: .01em; text-wrap: balance; animation: float 3s ease-in-out infinite; }
+.logo small:empty { display: none; } .logo .lg1 { margin: 0 0 4px; }
 .logo small { display: block; font-size: .46em; color: #fff; -webkit-text-stroke: 5px var(--ink); text-shadow: 0 3px 0 var(--ink); margin-top: 8px; letter-spacing: .03em; }
 @keyframes float { 0%, 100% { transform: translateY(0) rotate(-1.5deg); } 50% { transform: translateY(-8px) rotate(1.5deg); } }
 .btn {
@@ -343,7 +344,7 @@ button.chip:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--ink);
 <div id="toast" hidden><span class="ti"></span><div><b class="tt"></b><small class="ts"></small></div></div>
 
 <section class="screen" id="splash">
-  <h1 class="logo">Zip<small data-i18n="logo2">et les Gloops</small></h1>
+  <h1 class="logo"><small class="lg1" data-i18n="logo1">L’Académie de</small><span data-i18n="logo_big">Zip</span><small data-i18n="logo2"></small></h1>
   <button class="btn pulse" id="start" type="button" data-i18n="start">Jouer !</button>
   <div id="who"><small data-i18n="who">Qui joue ?</small><div class="profs" id="who-profs"></div>
     <input id="who-name" class="setinp" type="text" maxlength="12" autocomplete="off" autocapitalize="words" spellcheck="false" data-ph="name_ph" hidden>
@@ -352,7 +353,7 @@ button.chip:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--ink);
 </section>
 
 <section class="screen" id="menu" hidden>
-  <h1 class="logo" style="font-size:clamp(30px,8.5vw,46px)">Zip<small data-i18n="logo2">et les Gloops</small></h1>
+  <h1 class="logo" style="font-size:clamp(26px,7.2vw,40px);margin-bottom:6px"><small class="lg1" data-i18n="logo1">L’Académie de</small><span data-i18n="logo_big">Zip</span><small data-i18n="logo2"></small></h1>
   <button class="advbtn playbtn" id="playbtn" type="button"><span class="ai">▶️</span><span><b data-i18n="play">Jouer</b><small id="play-sub"></small></span></button>
   <button class="advbtn" id="advbtn" type="button"><span class="ai">🗺️</span><span><b data-i18n="m_adv">Aventure</b><small data-i18n="adv_sub">Aide tes nouveaux amis !</small></span></button>
   <div class="row3">
@@ -586,8 +587,8 @@ let L = save.lang;
 
 /* ---------------------------------------------------------------- text */
 const UI = {
-  fr: { logo2: 'et les Gloops', start: 'Jouer !', m_count: 'Compter', m_numbers: 'Les nombres', m_add: 'Additions', m_letters: 'Les lettres', m_first: 'Première lettre', album: 'Mes autocollants', again: 'Encore !', menu: 'Menu', newsticker: 'Nouvel autocollant !', yay: 'Youpi !', back: 'Retour', home: 'Menu', music: 'Son', listen: 'Écouter', m_drive: 'En voiture', m_place: 'Les mots', m_colors: 'Les couleurs', snd_music: 'Musique', snd_voice: 'Voix', m_race: 'Course', m_paint: 'Dessin', m_stories: 'Histoires', p_undo: 'Annuler', p_erase: 'Gomme', p_clear: 'Effacer', p_save: 'Garder', s_listen: 'Écouter', s_again: 'Relire', s_more: 'Autres histoires', s_title: 'Quelle histoire ?', s_q: 'Questions', shop: 'Boutique', tab_hat: 'Chapeaux', tab_glasses: 'Lunettes', tab_zip: 'Couleur de Zip', tab_car: 'Couleur de la voiture', m_adv: 'Aventure', adv_sub: 'Aide tes nouveaux amis !', trophies: 'Trophées', album_btn: 'Autocollants', chal_title: 'Défis du jour', ach_title: 'Mes trophées', go: 'On y va !', next: 'Suivant' },
-  en: { logo2: '& the Gloops', start: 'Play!', m_count: 'Counting', m_numbers: 'Numbers', m_add: 'Adding', m_letters: 'Letters', m_first: 'First letter', album: 'My stickers', again: 'Again!', menu: 'Menu', newsticker: 'New sticker!', yay: 'Yay!', back: 'Back', home: 'Menu', music: 'Sound', listen: 'Listen', m_drive: 'Road trip', m_place: 'Spelling', m_colors: 'Colors', snd_music: 'Music', snd_voice: 'Voice', m_race: 'Race', m_paint: 'Paint', m_stories: 'Stories', p_undo: 'Undo', p_erase: 'Eraser', p_clear: 'Clear', p_save: 'Save', s_listen: 'Listen', s_again: 'Read again', s_more: 'More stories', s_title: 'Which story?', s_q: 'Questions', shop: 'Shop', tab_hat: 'Hats', tab_glasses: 'Glasses', tab_zip: 'Zip color', tab_car: 'Car color', m_adv: 'Adventure', adv_sub: 'Help your new friends!', trophies: 'Trophies', album_btn: 'Stickers', chal_title: 'Daily challenges', ach_title: 'My trophies', go: "Let's go!", next: 'Next' }
+  fr: { logo1: 'L’Académie de', logo_big: 'Zip', logo2: '', start: 'Jouer !', m_count: 'Compter', m_numbers: 'Les nombres', m_add: 'Additions', m_letters: 'Les lettres', m_first: 'Première lettre', album: 'Mes autocollants', again: 'Encore !', menu: 'Menu', newsticker: 'Nouvel autocollant !', yay: 'Youpi !', back: 'Retour', home: 'Menu', music: 'Son', listen: 'Écouter', m_drive: 'En voiture', m_place: 'Les mots', m_colors: 'Les couleurs', snd_music: 'Musique', snd_voice: 'Voix', m_race: 'Course', m_paint: 'Dessin', m_stories: 'Histoires', p_undo: 'Annuler', p_erase: 'Gomme', p_clear: 'Effacer', p_save: 'Garder', s_listen: 'Écouter', s_again: 'Relire', s_more: 'Autres histoires', s_title: 'Quelle histoire ?', s_q: 'Questions', shop: 'Boutique', tab_hat: 'Chapeaux', tab_glasses: 'Lunettes', tab_zip: 'Couleur de Zip', tab_car: 'Couleur de la voiture', m_adv: 'Aventure', adv_sub: 'Aide tes nouveaux amis !', trophies: 'Trophées', album_btn: 'Autocollants', chal_title: 'Défis du jour', ach_title: 'Mes trophées', go: 'On y va !', next: 'Suivant' },
+  en: { logo1: '', logo_big: 'Zip’s', logo2: 'Academy', start: 'Play!', m_count: 'Counting', m_numbers: 'Numbers', m_add: 'Adding', m_letters: 'Letters', m_first: 'First letter', album: 'My stickers', again: 'Again!', menu: 'Menu', newsticker: 'New sticker!', yay: 'Yay!', back: 'Back', home: 'Menu', music: 'Sound', listen: 'Listen', m_drive: 'Road trip', m_place: 'Spelling', m_colors: 'Colors', snd_music: 'Music', snd_voice: 'Voice', m_race: 'Race', m_paint: 'Paint', m_stories: 'Stories', p_undo: 'Undo', p_erase: 'Eraser', p_clear: 'Clear', p_save: 'Save', s_listen: 'Listen', s_again: 'Read again', s_more: 'More stories', s_title: 'Which story?', s_q: 'Questions', shop: 'Shop', tab_hat: 'Hats', tab_glasses: 'Glasses', tab_zip: 'Zip color', tab_car: 'Car color', m_adv: 'Adventure', adv_sub: 'Help your new friends!', trophies: 'Trophies', album_btn: 'Stickers', chal_title: 'Daily challenges', ach_title: 'My trophies', go: "Let's go!", next: 'Next' }
 };
 const TX = {
   fr: {
@@ -1167,7 +1168,7 @@ const STORIES = [
 ];
 
 /* ---------------------------------------------------------------- 1st-grade skills, menu meta, path text */
-const APP_VERSION = '2026-11-18.14';
+const APP_VERSION = '2026-11-18.15';
 const G1 = ['sub', 'compare', 'clock', 'shapes', 'pattern', 'sight', 'syl', 'rhyme'];
 const MODES_G1 = G1;
 const MODES_ALL = MODES7.concat(G1, ['geo', 'hunt', 'planets']);
@@ -1934,7 +1935,7 @@ function applyLang() {
   document.querySelectorAll('[data-ph]').forEach((el) => { el.placeholder = UI[L][el.dataset.ph]; });
   document.querySelectorAll('[data-i18n-aria]').forEach((el) => { el.setAttribute('aria-label', UI[L][el.dataset.i18nAria]); });
   $('l-fr').setAttribute('aria-pressed', String(L === 'fr')); $('l-en').setAttribute('aria-pressed', String(L === 'en'));
-  document.title = L === 'fr' ? 'Zip et les Gloops' : 'Zip & the Gloops';
+  document.title = L === 'fr' ? 'L’Académie de Zip' : 'Zip’s Academy';
   $('starn').textContent = balance();
   renderPips(); if (S.screen === 'album') renderAlbum(); if (S.screen === 'adv') renderAdv(S.advView); if (S.screen === 'trophy') Prog.render(); if (S.screen === 'shop') renderShop(); if (S.screen === 'story') storyList(); if (S.screen === 'path') renderPath(S.pathView, false); if (S.screen === 'cat') openCat(S.cat); if (S.screen === 'settings') renderSettings(); Prog.updateBtn();
 }

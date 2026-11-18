@@ -1,6 +1,6 @@
-# Zip et les Gloops / Zip & the Gloops
+# L’Académie de Zip / Zip’s Academy
 
-A free, bilingual (French / English) learning game for kids around 5–7. Play it in any browser, no install, no account, no ads.
+A free, bilingual (French / English) learning game for kids around 5–7. Play it in any browser, no install, no sign-up, no ads. Several kids can have their own player on one device.
 
 **Play:** https://mitchcharles21.github.io/zip-et-les-gloops/
 
@@ -8,7 +8,8 @@ A free, bilingual (French / English) learning game for kids around 5–7. Play i
 - **Zip's path**: a short daily path (5 activities) that picks games the child needs to practice
 - **Maths**: counting, numbers, adding, subtracting, more/less, patterns, clock, shapes
 - **Reading**: letters, first letter, spell words, sight words, syllables, rhymes
-- **Games**: road trip, race, colors, adventure with friends
+- **Games**: road trip, race, adventure with friends
+- **Discover**: colors, the world, shape hunt, planets
 - **Stories**: 7 short animated stories with comprehension questions
 - **Paint**: free drawing with stamps and an eraser
 - Stars, stickers, trophies, daily challenges and a little shop to dress up Zip
