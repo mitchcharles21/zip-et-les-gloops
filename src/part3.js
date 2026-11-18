@@ -1247,13 +1247,12 @@ function renderProfs(el) {
     el.appendChild(b);
   });
 }
-function renderWho() { $('who').hidden = prof.list.length < 2; renderProfs($('who-profs')); }
+function renderWho() { renderProfs($('who-profs')); $('who-name').hidden = !!meProf().name; $('who-name').value = ''; $('who-add').hidden = prof.list.length >= 6; }
 function switchProfile(id) { persist(); noPersist = true; prof.act = id; saveIdx(); location.reload(); }
 function addProfile() {
   if (prof.list.length >= 6) return;
   persist(); noPersist = true;
   const id = 'p' + Date.now().toString(36); prof.list.push({ id, name: '' }); prof.act = id; saveIdx();
-  try { sessionStorage.setItem('zip-open-settings', '1'); } catch (e) { /* ignore */ }
   location.reload();
 }
 function resetProgress() {
@@ -1310,6 +1309,8 @@ $('st-name').addEventListener('blur', () => { setName(save.name); });
 $('st-name').addEventListener('keydown', (e) => { if (e.key === 'Enter') e.target.blur(); });
 $('st-name').addEventListener('change', () => { if (save.name) Voice.say(UI[L].hi_name(save.name)); });
 $('st-add').addEventListener('click', () => { Snd.unlock(); Snd.click(); addProfile(); });
+$('who-add').addEventListener('click', () => { Snd.unlock(); Snd.click(); addProfile(); });
+$('who-name').addEventListener('input', (e) => { setName(e.target.value.replace(/[<>&"]/g, '').trim().slice(0, 12)); renderProfs($('who-profs')); });
 armed($('st-reset'), resetProgress); armed($('st-del'), deleteProfile);
 $('st-back').addEventListener('click', () => { Snd.click(); goMenu(); });
 
@@ -1395,7 +1396,7 @@ window.addEventListener('orientationchange', () => setTimeout(resize, 200));
 
 sndSync();
 applyLang(); show('splash'); resize(); Prog.updateBtn(); renderWho();
-try { if (sessionStorage.getItem('zip-open-settings')) { sessionStorage.removeItem('zip-open-settings'); openSettings(); } } catch (e) { /* ignore */ }
+if (!meProf().name) setTimeout(() => { try { $('who-name').focus(); } catch (e) { /* ignore */ } }, 400);
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { /* canvas text uses Fredoka once loaded */ });
 requestAnimationFrame(frame);
 window.__GLOOPS = { S, save, blobs: () => blobs, fire, GEN, newQuestion, startMode, T: () => T, P, car, SHOP, openShop, Prog, openAdv, advNext, startStop, finishStop, race, startRace, openPath, ensurePath, startPathStep, pathStepDone, openCat, MODE_META, CAT_ORDER, STORY, PAINT, openStories, openPaint, STORIES };

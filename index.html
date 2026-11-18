@@ -311,7 +311,9 @@ button.chip:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--ink);
 .profs { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; width: 100%; }
 .pchip { min-height: 44px; padding: 6px 14px; border: 3px solid var(--ink); border-radius: 22px; background: #fff; font-size: 18px; font-weight: 700; box-shadow: 0 3px 0 var(--ink); }
 .pchip[aria-pressed="true"] { background: var(--mint); }
-#who { display: flex; flex-direction: column; align-items: center; gap: 6px; } #who[hidden] { display: none; } #who small { font-size: 18px; font-weight: 700; }
+#splash { justify-content: center; padding-bottom: clamp(90px, 22vh, 150px); box-sizing: border-box; } #splash > * { margin-top: 0; margin-bottom: 0; }
+#who { display: flex; flex-direction: column; align-items: center; gap: 8px; width: min(100%, 360px); } #who .setinp { max-width: 260px; } #who-add { font-size: 17px; padding: 6px 14px; min-height: 0; }
+.btn[hidden], .setinp[hidden] { display: none; } #who small { font-size: 18px; font-weight: 700; }
 .setrow[hidden] { display: none; } .setrow.armed { background: #ffd0d0; }
 </style>
 
@@ -343,7 +345,10 @@ button.chip:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--ink);
 <section class="screen" id="splash">
   <h1 class="logo">Zip<small data-i18n="logo2">et les Gloops</small></h1>
   <button class="btn pulse" id="start" type="button" data-i18n="start">Jouer !</button>
-  <div id="who" hidden><small data-i18n="who">Qui joue ?</small><div class="profs" id="who-profs"></div></div>
+  <div id="who"><small data-i18n="who">Qui joue ?</small><div class="profs" id="who-profs"></div>
+    <input id="who-name" class="setinp" type="text" maxlength="12" autocomplete="off" autocapitalize="words" spellcheck="false" data-ph="name_ph" hidden>
+    <button class="btn alt small" id="who-add" type="button" data-i18n="add_player">➕ Nouveau joueur</button>
+  </div>
 </section>
 
 <section class="screen" id="menu" hidden>
@@ -1162,7 +1167,7 @@ const STORIES = [
 ];
 
 /* ---------------------------------------------------------------- 1st-grade skills, menu meta, path text */
-const APP_VERSION = '2026-11-18.12';
+const APP_VERSION = '2026-11-18.13';
 const G1 = ['sub', 'compare', 'clock', 'shapes', 'pattern', 'sight', 'syl', 'rhyme'];
 const MODES_G1 = G1;
 const MODES_ALL = MODES7.concat(G1, ['geo', 'hunt', 'planets']);
@@ -2701,13 +2706,12 @@ function renderProfs(el) {
     el.appendChild(b);
   });
 }
-function renderWho() { $('who').hidden = prof.list.length < 2; renderProfs($('who-profs')); }
+function renderWho() { renderProfs($('who-profs')); $('who-name').hidden = !!meProf().name; $('who-name').value = ''; $('who-add').hidden = prof.list.length >= 6; }
 function switchProfile(id) { persist(); noPersist = true; prof.act = id; saveIdx(); location.reload(); }
 function addProfile() {
   if (prof.list.length >= 6) return;
   persist(); noPersist = true;
   const id = 'p' + Date.now().toString(36); prof.list.push({ id, name: '' }); prof.act = id; saveIdx();
-  try { sessionStorage.setItem('zip-open-settings', '1'); } catch (e) { /* ignore */ }
   location.reload();
 }
 function resetProgress() {
@@ -2764,6 +2768,8 @@ $('st-name').addEventListener('blur', () => { setName(save.name); });
 $('st-name').addEventListener('keydown', (e) => { if (e.key === 'Enter') e.target.blur(); });
 $('st-name').addEventListener('change', () => { if (save.name) Voice.say(UI[L].hi_name(save.name)); });
 $('st-add').addEventListener('click', () => { Snd.unlock(); Snd.click(); addProfile(); });
+$('who-add').addEventListener('click', () => { Snd.unlock(); Snd.click(); addProfile(); });
+$('who-name').addEventListener('input', (e) => { setName(e.target.value.replace(/[<>&"]/g, '').trim().slice(0, 12)); renderProfs($('who-profs')); });
 armed($('st-reset'), resetProgress); armed($('st-del'), deleteProfile);
 $('st-back').addEventListener('click', () => { Snd.click(); goMenu(); });
 
@@ -2849,7 +2855,7 @@ window.addEventListener('orientationchange', () => setTimeout(resize, 200));
 
 sndSync();
 applyLang(); show('splash'); resize(); Prog.updateBtn(); renderWho();
-try { if (sessionStorage.getItem('zip-open-settings')) { sessionStorage.removeItem('zip-open-settings'); openSettings(); } } catch (e) { /* ignore */ }
+if (!meProf().name) setTimeout(() => { try { $('who-name').focus(); } catch (e) { /* ignore */ } }, 400);
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { /* canvas text uses Fredoka once loaded */ });
 requestAnimationFrame(frame);
 window.__GLOOPS = { S, save, blobs: () => blobs, fire, GEN, newQuestion, startMode, T: () => T, P, car, SHOP, openShop, Prog, openAdv, advNext, startStop, finishStop, race, startRace, openPath, ensurePath, startPathStep, pathStepDone, openCat, MODE_META, CAT_ORDER, STORY, PAINT, openStories, openPaint, STORIES };

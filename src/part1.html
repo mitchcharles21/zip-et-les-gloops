@@ -298,7 +298,9 @@ button.chip:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--ink);
 .profs { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; width: 100%; }
 .pchip { min-height: 44px; padding: 6px 14px; border: 3px solid var(--ink); border-radius: 22px; background: #fff; font-size: 18px; font-weight: 700; box-shadow: 0 3px 0 var(--ink); }
 .pchip[aria-pressed="true"] { background: var(--mint); }
-#who { display: flex; flex-direction: column; align-items: center; gap: 6px; } #who[hidden] { display: none; } #who small { font-size: 18px; font-weight: 700; }
+#splash { justify-content: center; padding-bottom: clamp(90px, 22vh, 150px); box-sizing: border-box; } #splash > * { margin-top: 0; margin-bottom: 0; }
+#who { display: flex; flex-direction: column; align-items: center; gap: 8px; width: min(100%, 360px); } #who .setinp { max-width: 260px; } #who-add { font-size: 17px; padding: 6px 14px; min-height: 0; }
+.btn[hidden], .setinp[hidden] { display: none; } #who small { font-size: 18px; font-weight: 700; }
 .setrow[hidden] { display: none; } .setrow.armed { background: #ffd0d0; }
 </style>
 
@@ -330,7 +332,10 @@ button.chip:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--ink);
 <section class="screen" id="splash">
   <h1 class="logo">Zip<small data-i18n="logo2">et les Gloops</small></h1>
   <button class="btn pulse" id="start" type="button" data-i18n="start">Jouer !</button>
-  <div id="who" hidden><small data-i18n="who">Qui joue ?</small><div class="profs" id="who-profs"></div></div>
+  <div id="who"><small data-i18n="who">Qui joue ?</small><div class="profs" id="who-profs"></div>
+    <input id="who-name" class="setinp" type="text" maxlength="12" autocomplete="off" autocapitalize="words" spellcheck="false" data-ph="name_ph" hidden>
+    <button class="btn alt small" id="who-add" type="button" data-i18n="add_player">➕ Nouveau joueur</button>
+  </div>
 </section>
 
 <section class="screen" id="menu" hidden>
