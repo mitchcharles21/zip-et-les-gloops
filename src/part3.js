@@ -164,10 +164,15 @@ function drawBlob(b) {
   ctx.fillStyle = 'rgba(255,255,255,.6)'; ctx.beginPath(); ctx.ellipse(-r * 0.45, -r * 0.62, r * 0.2, r * 0.1, -0.7, 0, 7); ctx.fill();
   // belly badge with the answer
   ctx.fillStyle = '#fffaf0'; ctx.strokeStyle = INK; ctx.lineWidth = 3.5;
+  if (b.img) {
+    ctx.beginPath(); ctx.ellipse(0, r * 0.26, r * 0.76, r * 0.66, 0, 0, 7); ctx.fill(); ctx.stroke();
+    const im = imgFor(b.img); if (im.complete && im.naturalWidth) ctx.drawImage(im, -r * 0.64, r * 0.26 - r * 0.64, r * 1.28, r * 1.28);
+  } else {
   ctx.beginPath(); ctx.ellipse(0, r * 0.3, r * 0.58, r * 0.46, 0, 0, 7); ctx.fill(); ctx.stroke();
   ctx.fillStyle = INK; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
   const fs = r * (b.label.length > 1 ? Math.min(0.62, (b.label.length > 5 ? 2.1 : 2.6) / b.label.length) : 0.78);
   ctx.font = `700 ${fs}px Fredoka, 'Arial Rounded MT Bold', sans-serif`; ctx.fillText(b.label, 0, r * 0.33);
+  }
   // face: eyes
   const ey = -r * 0.42, ex = r * 0.3;
   for (const s of [-1, 1]) {
@@ -544,7 +549,7 @@ function newQuestion(keepCount) {
   }
   P.active = false;
   const colors = shuffle(BLOB_COLORS);
-  blobs = q.opts.map((o, i) => ({ val: o.val, label: o.label, say: o.say, color: o.hex || colors[i % colors.length], ph: rnd(0, 6), bx: W / 2, by: H / 2, r: 60, state: 'in', t0: T, delay: 0.1 + i * 0.09, alpha: 1, dim: false, glow: false, blink: 0, nextBlink: T + rnd(1, 4), cx: null, cy: null }));
+  blobs = q.opts.map((o, i) => ({ val: o.val, img: o.img || null, label: o.label, say: o.say, color: o.hex || colors[i % colors.length], ph: rnd(0, 6), bx: W / 2, by: H / 2, r: 60, state: 'in', t0: T, delay: 0.1 + i * 0.09, alpha: 1, dim: false, glow: false, blink: 0, nextBlink: T + rnd(1, 4), cx: null, cy: null }));
   if (kind === 'drive') { if (!car.on) car.mode = 'wait'; car.b = null; drv.off = -H * 0.8; drv.sliding = true; drv.sl0 = T; }
   requestAnimationFrame(() => requestAnimationFrame(() => {
     if (id !== S.qid) return;
