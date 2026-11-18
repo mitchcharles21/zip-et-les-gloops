@@ -289,6 +289,14 @@ button.chip:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--ink);
 #soundpop .tg { width: 46px; height: 26px; border-radius: 13px; border: 3px solid var(--ink); background: #d8d0e8; position: relative; flex: 0 0 auto; transition: background .15s; }
 #soundpop .tg::after { content: ''; position: absolute; top: 1px; left: 1px; width: 18px; height: 18px; border-radius: 50%; background: #fff; border: 3px solid var(--ink); box-sizing: content-box; transform: translateX(0); transition: transform .15s; margin: -1px 0 0 -1px; }
 #soundpop [aria-pressed="true"] .sw { background: var(--mint); } #soundpop [aria-pressed="true"] .sw::after { transform: translateX(20px); }
+.setgrp { display: flex; flex-direction: column; gap: 8px; align-items: stretch; width: 100%; } .setgrp > b { font-size: 20px; }
+.setrow { display: flex; align-items: center; gap: 10px; background: #fff; border: 3px solid var(--ink); border-radius: 16px; padding: 8px 10px; font-size: 18px; font-weight: 700; min-height: 46px; }
+.setrow .si { font-size: 22px; } .setrow span:nth-child(2) { flex: 1; text-align: left; }
+.setrow .tg, #soundpop .tg { width: 46px; height: 26px; border-radius: 13px; border: 3px solid var(--ink); background: #d8d0e8; position: relative; flex: 0 0 auto; transition: background .15s; box-sizing: border-box; }
+.setrow .tg::after { content: ''; position: absolute; top: 1px; left: 1px; width: 16px; height: 16px; border-radius: 50%; background: #fff; border: 3px solid var(--ink); transform: translateX(0); transition: transform .15s; }
+.setrow[aria-pressed="true"] .tg { background: var(--mint); } .setrow[aria-pressed="true"] .tg::after { transform: translateX(20px); }
+.setnote { margin: 0; font-size: 15px; opacity: .8; text-align: center; min-height: 1.2em; }
+#settingsscr { gap: 12px; }
 </style>
 
 <canvas id="cv" aria-label="Game scene"></canvas>
@@ -327,11 +335,13 @@ button.chip:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--ink);
   <div class="row3">
     <button class="mini" data-cat="math" type="button"><span class="mi">🔢</span><span data-i18n="cat_math">Maths</span></button>
     <button class="mini" data-cat="read" type="button"><span class="mi">🔤</span><span data-i18n="cat_read">Lecture</span></button>
+    <button class="mini" data-cat="disc" type="button"><span class="mi">🌍</span><span data-i18n="cat_disc">Découvrir</span></button>
     <button class="mini" data-cat="fun" type="button"><span class="mi">🎮</span><span data-i18n="cat_fun">Jeux</span></button>
   </div>
   <div class="row3">
     <button class="mini" id="storiesbtn" type="button"><span class="mi">📖</span><span data-i18n="m_stories">Histoires</span></button>
     <button class="mini" id="paintbtn" type="button"><span class="mi">🖍️</span><span data-i18n="m_paint">Dessin</span></button>
+    <button class="mini" id="settingsbtn" type="button"><span class="mi">⚙️</span><span data-i18n="settings">Réglages</span></button>
   </div>
   <div class="row3">
     <button class="mini" id="trbtn" type="button"><span class="mi">🏅</span><span data-i18n="trophies">Trophées</span><b id="trcount"></b></button>
@@ -397,6 +407,22 @@ button.chip:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--ink);
     <p id="path-say"></p>
     <button class="btn pulse" id="path-go" type="button"></button>
     <button class="btn alt small" id="path-back" type="button" data-i18n="path_menu">Menu</button>
+  </div>
+</section>
+
+<section class="screen" id="settingsscr" hidden>
+  <div class="panel">
+    <h2 data-i18n="settings" style="margin:0">Réglages</h2>
+    <div class="setgrp"><b data-i18n="st_sound">Son</b>
+      <button type="button" class="setrow" id="st-music" aria-pressed="true"><span class="si">🎵</span><span data-i18n="snd_music">Musique</span><i class="tg"></i></button>
+      <button type="button" class="setrow" id="st-voice" aria-pressed="true"><span class="si">🗣️</span><span data-i18n="snd_voice">Voix</span><i class="tg"></i></button>
+    </div>
+    <div class="setgrp"><b data-i18n="st_updates">Mises à jour</b>
+      <button class="btn small" id="st-update" type="button" data-i18n="upd_btn">Chercher une mise à jour</button>
+      <p id="st-status" class="setnote"></p>
+      <p class="setnote" id="st-ver"></p>
+    </div>
+    <button class="btn alt small" id="st-back" type="button" data-i18n="menu">Menu</button>
   </div>
 </section>
 

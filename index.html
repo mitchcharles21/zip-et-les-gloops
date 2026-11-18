@@ -302,6 +302,14 @@ button.chip:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--ink);
 #soundpop .tg { width: 46px; height: 26px; border-radius: 13px; border: 3px solid var(--ink); background: #d8d0e8; position: relative; flex: 0 0 auto; transition: background .15s; }
 #soundpop .tg::after { content: ''; position: absolute; top: 1px; left: 1px; width: 18px; height: 18px; border-radius: 50%; background: #fff; border: 3px solid var(--ink); box-sizing: content-box; transform: translateX(0); transition: transform .15s; margin: -1px 0 0 -1px; }
 #soundpop [aria-pressed="true"] .sw { background: var(--mint); } #soundpop [aria-pressed="true"] .sw::after { transform: translateX(20px); }
+.setgrp { display: flex; flex-direction: column; gap: 8px; align-items: stretch; width: 100%; } .setgrp > b { font-size: 20px; }
+.setrow { display: flex; align-items: center; gap: 10px; background: #fff; border: 3px solid var(--ink); border-radius: 16px; padding: 8px 10px; font-size: 18px; font-weight: 700; min-height: 46px; }
+.setrow .si { font-size: 22px; } .setrow span:nth-child(2) { flex: 1; text-align: left; }
+.setrow .tg, #soundpop .tg { width: 46px; height: 26px; border-radius: 13px; border: 3px solid var(--ink); background: #d8d0e8; position: relative; flex: 0 0 auto; transition: background .15s; box-sizing: border-box; }
+.setrow .tg::after { content: ''; position: absolute; top: 1px; left: 1px; width: 16px; height: 16px; border-radius: 50%; background: #fff; border: 3px solid var(--ink); transform: translateX(0); transition: transform .15s; }
+.setrow[aria-pressed="true"] .tg { background: var(--mint); } .setrow[aria-pressed="true"] .tg::after { transform: translateX(20px); }
+.setnote { margin: 0; font-size: 15px; opacity: .8; text-align: center; min-height: 1.2em; }
+#settingsscr { gap: 12px; }
 </style>
 
 <canvas id="cv" aria-label="Game scene"></canvas>
@@ -340,11 +348,13 @@ button.chip:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--ink);
   <div class="row3">
     <button class="mini" data-cat="math" type="button"><span class="mi">🔢</span><span data-i18n="cat_math">Maths</span></button>
     <button class="mini" data-cat="read" type="button"><span class="mi">🔤</span><span data-i18n="cat_read">Lecture</span></button>
+    <button class="mini" data-cat="disc" type="button"><span class="mi">🌍</span><span data-i18n="cat_disc">Découvrir</span></button>
     <button class="mini" data-cat="fun" type="button"><span class="mi">🎮</span><span data-i18n="cat_fun">Jeux</span></button>
   </div>
   <div class="row3">
     <button class="mini" id="storiesbtn" type="button"><span class="mi">📖</span><span data-i18n="m_stories">Histoires</span></button>
     <button class="mini" id="paintbtn" type="button"><span class="mi">🖍️</span><span data-i18n="m_paint">Dessin</span></button>
+    <button class="mini" id="settingsbtn" type="button"><span class="mi">⚙️</span><span data-i18n="settings">Réglages</span></button>
   </div>
   <div class="row3">
     <button class="mini" id="trbtn" type="button"><span class="mi">🏅</span><span data-i18n="trophies">Trophées</span><b id="trcount"></b></button>
@@ -410,6 +420,22 @@ button.chip:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--ink);
     <p id="path-say"></p>
     <button class="btn pulse" id="path-go" type="button"></button>
     <button class="btn alt small" id="path-back" type="button" data-i18n="path_menu">Menu</button>
+  </div>
+</section>
+
+<section class="screen" id="settingsscr" hidden>
+  <div class="panel">
+    <h2 data-i18n="settings" style="margin:0">Réglages</h2>
+    <div class="setgrp"><b data-i18n="st_sound">Son</b>
+      <button type="button" class="setrow" id="st-music" aria-pressed="true"><span class="si">🎵</span><span data-i18n="snd_music">Musique</span><i class="tg"></i></button>
+      <button type="button" class="setrow" id="st-voice" aria-pressed="true"><span class="si">🗣️</span><span data-i18n="snd_voice">Voix</span><i class="tg"></i></button>
+    </div>
+    <div class="setgrp"><b data-i18n="st_updates">Mises à jour</b>
+      <button class="btn small" id="st-update" type="button" data-i18n="upd_btn">Chercher une mise à jour</button>
+      <p id="st-status" class="setnote"></p>
+      <p class="setnote" id="st-ver"></p>
+    </div>
+    <button class="btn alt small" id="st-back" type="button" data-i18n="menu">Menu</button>
   </div>
 </section>
 
@@ -485,7 +511,7 @@ const lerp = (a, b, t) => a + (b - a) * t;
 /* ---------------------------------------------------------------- save */
 const SAVE_KEY = 'zip-gloops-v1';
 const save = {
-  lang: 'fr', music: true, voice: true, stars: 0, stickers: 0, lv: { count: 1, numbers: 1, add: 1, letters: 1, first: 1, drive: 1, place: 1, colors: 1, race: 1, sub: 1, compare: 1, clock: 1, shapes: 1, pattern: 1, sight: 1, syl: 1, rhyme: 1 },
+  lang: 'fr', music: true, voice: true, stars: 0, stickers: 0, lv: { count: 1, numbers: 1, add: 1, letters: 1, first: 1, drive: 1, place: 1, colors: 1, race: 1, sub: 1, compare: 1, clock: 1, shapes: 1, pattern: 1, sight: 1, syl: 1, rhyme: 1, geo: 1, hunt: 1 },
   st: { right: 0, first: 0, rounds: 0, perfect: 0, best: 0, place: 0, drive: 0, chals: 0, alldays: 0, adv: 0, bought: 0, race: 0, art: 0, stories: 0, paths: 0, mode: {} },
   spent: 0, shop: { owned: {}, eq: { hat: '', glasses: '', zip: 'blue', car: 'red' } },
   ach: {}, day: null, dayStreak: { last: '', n: 0 }, adv: { stop: 0, friends: [] }, acc: {}, path: null
@@ -1099,9 +1125,10 @@ const STORIES = [
 ];
 
 /* ---------------------------------------------------------------- 1st-grade skills, menu meta, path text */
+const APP_VERSION = '2026-11-18.2';
 const G1 = ['sub', 'compare', 'clock', 'shapes', 'pattern', 'sight', 'syl', 'rhyme'];
 const MODES_G1 = G1;
-const MODES_ALL = MODES7.concat(G1);
+const MODES_ALL = MODES7.concat(G1, ['geo', 'hunt']);
 const MODE_META = {
   count: { ico: '🍎', cls: 'm1', cat: 'math', d: { fr: 'Compte les objets', en: 'Count the objects' } },
   numbers: { ico: '7', cls: 'm2', cat: 'math', d: { fr: 'Reconnais les nombres', en: 'Find the numbers' } },
@@ -1119,17 +1146,19 @@ const MODE_META = {
   rhyme: { ico: '🎵', bg: '#9fe3ff', cat: 'read', d: { fr: 'Trouve la rime', en: 'Find the rhyme' } },
   drive: { ico: '🚗', cls: 'm6', cat: 'fun', d: { fr: 'Conduis vers la bonne réponse', en: 'Drive to the right answer' } },
   race: { ico: '🏎️', cls: 'm9', cat: 'fun', d: { fr: 'Course : bonnes réponses = vitesse', en: 'Race: right answers = speed' } },
-  colors: { ico: '🎨', cls: 'm8', cat: 'fun', d: { fr: 'Apprends les couleurs', en: 'Learn the colors' } },
+  colors: { ico: '🎨', cls: 'm8', cat: 'disc', d: { fr: 'Apprends les couleurs', en: 'Learn the colors' } },
+  geo: { ico: '🌍', bg: '#8fd7a8', cat: 'disc', d: { fr: 'Découvre le monde', en: 'Discover the world' } },
+  hunt: { ico: '🔍', bg: '#b9d8ff', cat: 'disc', d: { fr: 'Trouve les formes autour de toi', en: 'Find shapes around you' } },
   story: { ico: '📖', bg: '#ffd9a0', cat: 'fun', d: { fr: 'Lis une histoire', en: 'Read a story' } }
 };
-const CAT_ORDER = { math: ['count', 'numbers', 'add', 'sub', 'compare', 'pattern', 'clock', 'shapes'], read: ['letters', 'first', 'place', 'sight', 'syl', 'rhyme'], fun: ['drive', 'race', 'colors'] };
+const CAT_ORDER = { math: ['count', 'numbers', 'add', 'sub', 'compare', 'pattern', 'clock', 'shapes'], read: ['letters', 'first', 'place', 'sight', 'syl', 'rhyme'], fun: ['drive', 'race'], disc: ['colors', 'geo', 'hunt'] };
 Object.assign(UI.fr, {
   m_sub: 'Soustractions', m_compare: 'Plus ou moins', m_clock: 'L’heure', m_shapes: 'Les formes', m_pattern: 'Les suites', m_sight: 'Mots usuels', m_syl: 'Syllabes', m_rhyme: 'Les rimes', m_story: 'Histoire',
-  cat_math: 'Maths', cat_read: 'Lecture', cat_fun: 'Jeux', play: 'Jouer', play_sub: 'Le parcours du jour', path_title: 'Le parcours de Zip', path_more: 'Un autre parcours', path_menu: 'Menu'
+  cat_math: 'Maths', cat_read: 'Lecture', cat_fun: 'Jeux', cat_disc: 'Découvrir', m_geo: 'Le monde', m_hunt: 'Chasse aux formes', settings: 'Réglages', upd_btn: 'Chercher une mise à jour', upd_checking: 'Vérification…', upd_ok: 'Le jeu est à jour ✓', upd_new: 'Nouvelle version ! Mise à jour…', upd_fail: 'Impossible de vérifier (pas de connexion ?)', upd_na: 'La mise à jour marche seulement sur le site web', ver: 'Version', st_updates: 'Mises à jour', st_sound: 'Son', play: 'Jouer', play_sub: 'Le parcours du jour', path_title: 'Le parcours de Zip', path_more: 'Un autre parcours', path_menu: 'Menu'
 });
 Object.assign(UI.en, {
   m_sub: 'Subtracting', m_compare: 'More or less', m_clock: 'Clock', m_shapes: 'Shapes', m_pattern: 'Patterns', m_sight: 'Sight words', m_syl: 'Syllables', m_rhyme: 'Rhymes', m_story: 'Story',
-  cat_math: 'Math', cat_read: 'Reading', cat_fun: 'Games', play: 'Play', play_sub: 'Today’s path', path_title: 'Zip’s path', path_more: 'Another path', path_menu: 'Menu'
+  cat_math: 'Math', cat_read: 'Reading', cat_fun: 'Games', cat_disc: 'Discover', m_geo: 'My world', m_hunt: 'Shape hunt', settings: 'Settings', upd_btn: 'Check for updates', upd_checking: 'Checking…', upd_ok: 'The game is up to date ✓', upd_new: 'New version! Updating…', upd_fail: 'Could not check (no connection?)', upd_na: 'Updates only work on the website', ver: 'Version', st_updates: 'Updates', st_sound: 'Sound', play: 'Play', play_sub: 'Today’s path', path_title: 'Zip’s path', path_more: 'Another path', path_menu: 'Menu'
 });
 const PX = {
   fr: { step: (n, t, name, d) => `Étape ${n} sur ${t} : ${name}. ${d} !`, nice: ['Bravo', 'Super', 'Génial', 'Bien joué'], done: `Parcours terminé ! Reviens demain pour un nouveau parcours !`, sub: (i, t) => i >= t ? 'Parcours terminé ✓' : `Étape ${i + 1} sur ${t}`, doneT: '🎉 Parcours terminé !', doneS: (s) => `+${s} ⭐` },
@@ -1299,6 +1328,53 @@ GEN.rhyme = function (lv) {
   return { vis: `${lv === 3 ? '' : `<div class="pic">${e}</div>`}<div class="word">${w}</div>`, text: t, say: fr_() ? `Quel mot rime avec ${w} ?` : `Which word rhymes with ${w}?`, ans, opts: wordOpts(ans, others), hint: `${w} – ${ans}` };
 };
 
+/* ---------------------------------------------------------------- geography + shape hunt */
+const LAND = [['🏔️', 'la montagne', 'the mountain'], ['🌋', 'le volcan', 'the volcano'], ['🏝️', 'l’île', 'the island'], ['🏜️', 'le désert', 'the desert'], ['🏖️', 'la plage', 'the beach'], ['🌲', 'la forêt', 'the forest'], ['🌊', 'la mer', 'the sea']];
+const HABS = [['🐧', 'le pingouin', 'the penguin', '❄️'], ['🐫', 'le chameau', 'the camel', '🏜️'], ['🐒', 'le singe', 'the monkey', '🌴'], ['🐟', 'le poisson', 'the fish', '🌊'], ['🐻', 'l’ours', 'the bear', '🌲'], ['🦀', 'le crabe', 'the crab', '🏖️'], ['🐢', 'la tortue de mer', 'the sea turtle', '🌊']];
+const HAB_ICONS = ['❄️', '🏜️', '🌴', '🌊', '🌲', '🏖️'];
+const CANADA = [
+  { fr: 'Quel est le drapeau du Canada ?', en: 'Which is the flag of Canada?', vis: '🍁', ans: '🇨🇦', d: ['🇺🇸', '🇫🇷', '🇧🇷'] },
+  { fr: 'Quelle feuille est sur le drapeau du Canada ?', en: 'Which leaf is on the flag of Canada?', vis: '🇨🇦', ans: '🍁', d: ['🍂', '🍃'] },
+  { fr: 'Quel animal est un symbole du Canada ?', en: 'Which animal is a symbol of Canada?', vis: '🍁', ans: '🦫', d: ['🐪', '🦒', '🐘'] },
+  { fr: 'Quelle est la capitale du Canada ?', en: 'What is the capital of Canada?', vis: '🍁', ans: 'Ottawa', d: ['Toronto', 'Calgary'] },
+  { fr: 'Quel pays est au sud du Canada ?', en: 'Which country is south of Canada?', vis: '🧭', ans: '🇺🇸', d: ['🇫🇷', '🇧🇷'] }
+];
+function compassSvg(deg) {
+  return `<svg viewBox="-60 -60 120 120" width="124" height="124" style="display:block;margin:0 auto"><circle r="56" fill="#fff" stroke="#3a2358" stroke-width="5"/><text x="0" y="-38" text-anchor="middle" font-size="16" font-weight="700" fill="#3a2358">N</text><g stroke="#3a2358" stroke-width="3"><line x1="0" y1="46" x2="0" y2="52"/><line x1="46" y1="0" x2="52" y2="0"/><line x1="-46" y1="0" x2="-52" y2="0"/></g><g transform="rotate(${deg})"><polygon points="0,-30 9,6 -9,6" fill="#ff5a5f" stroke="#3a2358" stroke-width="3" stroke-linejoin="round"/><rect x="-3" y="6" width="6" height="22" rx="3" fill="#3a2358"/></g><circle r="5" fill="#3a2358"/></svg>`;
+}
+GEN.geo = function (lv) {
+  const kinds = lv === 1 ? ['land', 'hab'] : lv === 2 ? ['hab', 'compass', 'land'] : ['canada', 'compass', 'hab'];
+  const k = pick(kinds), fr = fr_();
+  if (k === 'land') {
+    const [e, f, en] = pickFresh(LAND, 'land'), others = shuffle(LAND.filter((x) => x[0] !== e)).slice(0, 2), t = fr ? `Touche ${f} !` : `Tap ${en}!`;
+    return { vis: '<div class="pic">🗺️</div>', text: t, say: t, ans: e, opts: shuffle([[e, f, en]].concat(others)).map((x) => ({ val: x[0], label: x[0], say: fr ? x[1] : x[2] })), hint: fr ? f : en };
+  }
+  if (k === 'hab') {
+    const [a, f, en, h] = pickFresh(HABS, 'hab'), others = shuffle(HAB_ICONS.filter((x) => x !== h)).slice(0, 2), t = fr ? `Où vit ${f} ?` : `Where does ${en} live?`;
+    return { vis: `<div class="pic">${a}</div>`, text: t, say: t, ans: h, opts: shuffle([h].concat(others)).map((x) => ({ val: x, label: x, say: '' })), hint: h };
+  }
+  if (k === 'compass') {
+    const dirs = [['N', 0], ['E', 90], ['S', 180], [fr ? 'O' : 'W', 270]], [lab, deg] = pick(dirs), t = fr ? 'Où montre la flèche ?' : 'Where does the arrow point?';
+    return { vis: compassSvg(deg), text: t, say: fr ? 'Où montre la flèche ? Nord, est, sud ou ouest ?' : 'Where does the arrow point? North, east, south or west?', ans: lab, opts: shuffle(dirs).map(([l]) => ({ val: l, label: l, say: { N: fr ? 'nord' : 'north', E: fr ? 'est' : 'east', S: fr ? 'sud' : 'south', O: 'ouest', W: 'west' }[l] })), hint: lab };
+  }
+  const q = pickFresh(CANADA, 'canada'), t = q[L];
+  return { vis: `<div class="pic">${q.vis}</div>`, text: t, say: t, ans: q.ans, opts: shuffle([q.ans].concat(q.d.slice(0, 2))).map((x) => ({ val: x, label: x, say: x.length > 2 && !/\p{Extended_Pictographic}/u.test(x) ? x : '' })), hint: '' };
+};
+const HUNT = {
+  circle: { fr: 'un cercle', en: 'a circle', e: ['⚽', '🍪', '🌕', '🎾', '🪙', '🕒'] },
+  triangle: { fr: 'un triangle', en: 'a triangle', e: ['🍕', '⛺', '🔺'] },
+  square: { fr: 'un carré', en: 'a square', e: ['🧇', '🎁', '🪟'] },
+  rectangle: { fr: 'un rectangle', en: 'a rectangle', e: ['🚪', '📱', '📺', '✉️', '📖'] },
+  star: { fr: 'une étoile', en: 'a star', e: ['⭐', '🌟'] },
+  heart: { fr: 'un cœur', en: 'a heart', e: ['❤️', '💖'] }
+};
+GEN.hunt = function (lv) {
+  const pool = lv === 1 ? ['circle', 'triangle', 'square'] : ['circle', 'triangle', 'square', 'rectangle', 'star', 'heart'];
+  const id = pick(pool), ans = pick(HUNT[id].e), others = shuffle(pool.filter((x) => x !== id)).slice(0, lv === 1 ? 2 : 3).map((x) => pick(HUNT[x].e));
+  const t = fr_() ? `Touche ce qui ressemble à ${HUNT[id].fr} !` : `Tap what looks like ${HUNT[id].en}!`;
+  return { vis: shapeSvg(id, pick(['#ff7a8a', '#ffc93c', '#46d9a6', '#6fb7ff', '#a98bff'])), text: t, say: t, ans, opts: shuffle([ans].concat(others)).map((e) => ({ val: e, label: e, say: '' })), hint: '' };
+};
+
 /* ---------------------------------------------------------------- canvas engine */
 const cv = $('cv'), ctx = cv.getContext('2d');
 const INK = '#3a2358';
@@ -1318,7 +1394,7 @@ const PALS = {
 };
 PALS.race = PALS.drive;
 PALS.sub = PALS.add; PALS.compare = PALS.numbers; PALS.clock = PALS.count; PALS.shapes = PALS.colors; PALS.pattern = PALS.numbers; PALS.sight = PALS.letters; PALS.syl = PALS.first; PALS.rhyme = PALS.place;
-PALS.story = PALS.place;
+PALS.story = PALS.place; PALS.geo = PALS.drive; PALS.hunt = PALS.colors;
 const pal = PALS.menu.map(hex), palTo = pal.map((c) => c.slice());
 function setPal(name) { PALS[name].map(hex).forEach((c, i) => { palTo[i] = c; }); }
 const BLOB_COLORS = ['#ff7aa8', '#ffc93c', '#46d9a6', '#ff9a4d', '#9b7bff', '#4cc9f0'];
@@ -1738,13 +1814,13 @@ function drawParts(dt) {
 /* ---------------------------------------------------------------- game state */
 const MODEDEF = {
   count: { gen: 'count', kind: 'shoot' }, numbers: { gen: 'numbers', kind: 'shoot' }, add: { gen: 'add', kind: 'shoot' }, letters: { gen: 'letters', kind: 'shoot' },
-  first: { gen: 'first', kind: 'shoot' }, colors: { gen: 'colors', kind: 'shoot' }, drive: { gen: 'drive', kind: 'drive' }, race: { gen: 'race', kind: 'race' }, sub: { gen: 'sub', kind: 'shoot' }, compare: { gen: 'compare', kind: 'shoot' }, clock: { gen: 'clock', kind: 'shoot' }, shapes: { gen: 'shapes', kind: 'shoot' }, pattern: { gen: 'pattern', kind: 'shoot' }, sight: { gen: 'sight', kind: 'shoot' }, syl: { gen: 'syl', kind: 'shoot' }, rhyme: { gen: 'rhyme', kind: 'shoot' }, place: { gen: 'place', kind: 'place' }
+  first: { gen: 'first', kind: 'shoot' }, colors: { gen: 'colors', kind: 'shoot' }, drive: { gen: 'drive', kind: 'drive' }, race: { gen: 'race', kind: 'race' }, sub: { gen: 'sub', kind: 'shoot' }, compare: { gen: 'compare', kind: 'shoot' }, clock: { gen: 'clock', kind: 'shoot' }, shapes: { gen: 'shapes', kind: 'shoot' }, pattern: { gen: 'pattern', kind: 'shoot' }, sight: { gen: 'sight', kind: 'shoot' }, syl: { gen: 'syl', kind: 'shoot' }, rhyme: { gen: 'rhyme', kind: 'shoot' }, geo: { gen: 'geo', kind: 'shoot' }, hunt: { gen: 'hunt', kind: 'shoot' }, place: { gen: 'place', kind: 'place' }
 };
 const car = { x: 0, y: 0, rot: 0, mode: 'wait', b: null, t0: 0, dur: 1, hx: 0, hy: 0, jy: 0 };
 function kindNow() { return S.screen === 'play' && S.mode && MODEDEF[S.mode] ? MODEDEF[S.mode].kind : 'shoot'; }
 const S = { adv: null, advView: 'intro', advIdx: 0, stNext: null, friendHop: -9, screen: 'splash', mode: null, q: null, tries: 0, canTap: false, done: false, idle: 0, nudged: false, round: null, pendingSticker: false, greeted: false, shotTimer: 0, qid: 0 };
 const MODES = ['count', 'numbers', 'add', 'letters', 'first', 'drive', 'place', 'colors'];
-const screens = { splash: $('splash'), menu: $('menu'), roundend: $('roundend'), sticker: $('stickerscr'), album: $('albumscr'), adv: $('advscr'), trophy: $('trophyscr'), shop: $('shopscr'), cat: $('catscr'), path: $('pathscr'), paint: $('paintscr'), story: $('storyscr') };
+const screens = { splash: $('splash'), menu: $('menu'), roundend: $('roundend'), sticker: $('stickerscr'), album: $('albumscr'), adv: $('advscr'), trophy: $('trophyscr'), shop: $('shopscr'), cat: $('catscr'), settings: $('settingsscr'), path: $('pathscr'), paint: $('paintscr'), story: $('storyscr') };
 
 function applyLang() {
   document.documentElement.lang = L;
@@ -1753,7 +1829,7 @@ function applyLang() {
   $('l-fr').setAttribute('aria-pressed', String(L === 'fr')); $('l-en').setAttribute('aria-pressed', String(L === 'en'));
   document.title = L === 'fr' ? 'Zip et les Gloops' : 'Zip & the Gloops';
   $('starn').textContent = balance();
-  renderPips(); if (S.screen === 'album') renderAlbum(); if (S.screen === 'adv') renderAdv(S.advView); if (S.screen === 'trophy') Prog.render(); if (S.screen === 'shop') renderShop(); if (S.screen === 'story') storyList(); if (S.screen === 'path') renderPath(S.pathView, false); if (S.screen === 'cat') openCat(S.cat); Prog.updateBtn();
+  renderPips(); if (S.screen === 'album') renderAlbum(); if (S.screen === 'adv') renderAdv(S.advView); if (S.screen === 'trophy') Prog.render(); if (S.screen === 'shop') renderShop(); if (S.screen === 'story') storyList(); if (S.screen === 'path') renderPath(S.pathView, false); if (S.screen === 'cat') openCat(S.cat); if (S.screen === 'settings') renderSettings(); Prog.updateBtn();
 }
 function renderPips() {
   if (typeof updatePlayBtn === 'function') updatePlayBtn();
@@ -2448,7 +2524,7 @@ function wPick(cands, used) {
 }
 function genPath() {
   const used = new Set(), steps = [];
-  for (const k of ['math', 'read', 'math', 'read', 'fun']) { const m = wPick(k === 'fun' ? ['drive', 'race', 'colors', 'story'] : CAT_ORDER[k], used); used.add(m); steps.push(m); }
+  for (const k of ['math', 'read', 'math', 'read', 'fun']) { const m = wPick(k === 'fun' ? ['drive', 'race', 'colors', 'geo', 'hunt', 'story'] : CAT_ORDER[k], used); used.add(m); steps.push(m); }
   return steps;
 }
 function ensurePath(force) {
@@ -2503,6 +2579,33 @@ function pathStepDone(skip) {
 $('playbtn').addEventListener('click', () => { Snd.unlock(); Snd.click(); openPath(); });
 $('path-go').addEventListener('click', () => { Snd.click(); gate(() => { if (S.pathView === 'done') { ensurePath(true); const say = renderPath('step', false); Voice.say(say); } else startPathStep(); }); });
 $('path-back').addEventListener('click', () => { Snd.click(); goMenu(); });
+
+/* ---------------------------------------------------------------- settings */
+function renderSettings() {
+  $('st-music').setAttribute('aria-pressed', String(Snd.on)); $('st-voice').setAttribute('aria-pressed', String(Snd.voiceOn));
+  $('st-ver').textContent = UI[L].ver + ' ' + APP_VERSION;
+}
+function openSettings() { show('settings'); $('st-status').textContent = ''; renderSettings(); }
+async function checkUpdate() {
+  const el = $('st-status'), btn = $('st-update'); el.textContent = UI[L].upd_checking; btn.disabled = true;
+  try {
+    if (!/^https?:/.test(location.protocol)) { el.textContent = UI[L].upd_na; return; }
+    const r = await fetch('index.html?nocache=' + Date.now(), { cache: 'no-store' });
+    if (!r.ok) throw new Error('http ' + r.status);
+    const m = (await r.text()).match(/APP_VERSION = '([^']+)'/);
+    if (!m) throw new Error('no version');
+    if (m[1] !== APP_VERSION) {
+      el.textContent = UI[L].upd_new;
+      try { if ('serviceWorker' in navigator) { const reg = await navigator.serviceWorker.getRegistration(); if (reg) await reg.update(); } if (window.caches) { const ks = await caches.keys(); await Promise.all(ks.map((k) => caches.delete(k))); } } catch (e) { /* ignore */ }
+      setTimeout(() => location.reload(), 900);
+    } else el.textContent = UI[L].upd_ok;
+  } catch (e) { el.textContent = UI[L].upd_fail; } finally { btn.disabled = false; }
+}
+$('settingsbtn').addEventListener('click', () => { Snd.unlock(); Snd.click(); openSettings(); });
+$('st-music').addEventListener('click', () => { Snd.unlock(); Snd.setMusic(!Snd.on); Snd.click(); renderSettings(); sndSync(); });
+$('st-voice').addEventListener('click', () => { Snd.unlock(); const on = !Snd.voiceOn; Snd.setVoice(on); if (!on) Voice.stop(); Snd.click(); renderSettings(); sndSync(); if (on) Voice.say(L === 'fr' ? 'Salut !' : 'Hi!'); });
+$('st-update').addEventListener('click', () => { Snd.click(); checkUpdate(); });
+$('st-back').addEventListener('click', () => { Snd.click(); goMenu(); });
 
 function tickFrame(now) {
   const dt = Math.min(0.05, (now - last) / 1000); last = now; T += dt;

@@ -1,8 +1,9 @@
 
 /* ---------------------------------------------------------------- 1st-grade skills, menu meta, path text */
+const APP_VERSION = '2026-11-18.2';
 const G1 = ['sub', 'compare', 'clock', 'shapes', 'pattern', 'sight', 'syl', 'rhyme'];
 const MODES_G1 = G1;
-const MODES_ALL = MODES7.concat(G1);
+const MODES_ALL = MODES7.concat(G1, ['geo', 'hunt']);
 const MODE_META = {
   count: { ico: '🍎', cls: 'm1', cat: 'math', d: { fr: 'Compte les objets', en: 'Count the objects' } },
   numbers: { ico: '7', cls: 'm2', cat: 'math', d: { fr: 'Reconnais les nombres', en: 'Find the numbers' } },
@@ -20,17 +21,19 @@ const MODE_META = {
   rhyme: { ico: '🎵', bg: '#9fe3ff', cat: 'read', d: { fr: 'Trouve la rime', en: 'Find the rhyme' } },
   drive: { ico: '🚗', cls: 'm6', cat: 'fun', d: { fr: 'Conduis vers la bonne réponse', en: 'Drive to the right answer' } },
   race: { ico: '🏎️', cls: 'm9', cat: 'fun', d: { fr: 'Course : bonnes réponses = vitesse', en: 'Race: right answers = speed' } },
-  colors: { ico: '🎨', cls: 'm8', cat: 'fun', d: { fr: 'Apprends les couleurs', en: 'Learn the colors' } },
+  colors: { ico: '🎨', cls: 'm8', cat: 'disc', d: { fr: 'Apprends les couleurs', en: 'Learn the colors' } },
+  geo: { ico: '🌍', bg: '#8fd7a8', cat: 'disc', d: { fr: 'Découvre le monde', en: 'Discover the world' } },
+  hunt: { ico: '🔍', bg: '#b9d8ff', cat: 'disc', d: { fr: 'Trouve les formes autour de toi', en: 'Find shapes around you' } },
   story: { ico: '📖', bg: '#ffd9a0', cat: 'fun', d: { fr: 'Lis une histoire', en: 'Read a story' } }
 };
-const CAT_ORDER = { math: ['count', 'numbers', 'add', 'sub', 'compare', 'pattern', 'clock', 'shapes'], read: ['letters', 'first', 'place', 'sight', 'syl', 'rhyme'], fun: ['drive', 'race', 'colors'] };
+const CAT_ORDER = { math: ['count', 'numbers', 'add', 'sub', 'compare', 'pattern', 'clock', 'shapes'], read: ['letters', 'first', 'place', 'sight', 'syl', 'rhyme'], fun: ['drive', 'race'], disc: ['colors', 'geo', 'hunt'] };
 Object.assign(UI.fr, {
   m_sub: 'Soustractions', m_compare: 'Plus ou moins', m_clock: 'L’heure', m_shapes: 'Les formes', m_pattern: 'Les suites', m_sight: 'Mots usuels', m_syl: 'Syllabes', m_rhyme: 'Les rimes', m_story: 'Histoire',
-  cat_math: 'Maths', cat_read: 'Lecture', cat_fun: 'Jeux', play: 'Jouer', play_sub: 'Le parcours du jour', path_title: 'Le parcours de Zip', path_more: 'Un autre parcours', path_menu: 'Menu'
+  cat_math: 'Maths', cat_read: 'Lecture', cat_fun: 'Jeux', cat_disc: 'Découvrir', m_geo: 'Le monde', m_hunt: 'Chasse aux formes', settings: 'Réglages', upd_btn: 'Chercher une mise à jour', upd_checking: 'Vérification…', upd_ok: 'Le jeu est à jour ✓', upd_new: 'Nouvelle version ! Mise à jour…', upd_fail: 'Impossible de vérifier (pas de connexion ?)', upd_na: 'La mise à jour marche seulement sur le site web', ver: 'Version', st_updates: 'Mises à jour', st_sound: 'Son', play: 'Jouer', play_sub: 'Le parcours du jour', path_title: 'Le parcours de Zip', path_more: 'Un autre parcours', path_menu: 'Menu'
 });
 Object.assign(UI.en, {
   m_sub: 'Subtracting', m_compare: 'More or less', m_clock: 'Clock', m_shapes: 'Shapes', m_pattern: 'Patterns', m_sight: 'Sight words', m_syl: 'Syllables', m_rhyme: 'Rhymes', m_story: 'Story',
-  cat_math: 'Math', cat_read: 'Reading', cat_fun: 'Games', play: 'Play', play_sub: 'Today’s path', path_title: 'Zip’s path', path_more: 'Another path', path_menu: 'Menu'
+  cat_math: 'Math', cat_read: 'Reading', cat_fun: 'Games', cat_disc: 'Discover', m_geo: 'My world', m_hunt: 'Shape hunt', settings: 'Settings', upd_btn: 'Check for updates', upd_checking: 'Checking…', upd_ok: 'The game is up to date ✓', upd_new: 'New version! Updating…', upd_fail: 'Could not check (no connection?)', upd_na: 'Updates only work on the website', ver: 'Version', st_updates: 'Updates', st_sound: 'Sound', play: 'Play', play_sub: 'Today’s path', path_title: 'Zip’s path', path_more: 'Another path', path_menu: 'Menu'
 });
 const PX = {
   fr: { step: (n, t, name, d) => `Étape ${n} sur ${t} : ${name}. ${d} !`, nice: ['Bravo', 'Super', 'Génial', 'Bien joué'], done: `Parcours terminé ! Reviens demain pour un nouveau parcours !`, sub: (i, t) => i >= t ? 'Parcours terminé ✓' : `Étape ${i + 1} sur ${t}`, doneT: '🎉 Parcours terminé !', doneS: (s) => `+${s} ⭐` },
@@ -198,4 +201,51 @@ GEN.rhyme = function (lv) {
   const others = shuffle(groups.filter((_, i) => i !== gi)).slice(0, lv === 1 ? 2 : 3).map((g) => pick(g)[0]);
   const t = fr_() ? `Quel mot rime avec « ${w} » ?` : `Which word rhymes with “${w}”?`;
   return { vis: `${lv === 3 ? '' : `<div class="pic">${e}</div>`}<div class="word">${w}</div>`, text: t, say: fr_() ? `Quel mot rime avec ${w} ?` : `Which word rhymes with ${w}?`, ans, opts: wordOpts(ans, others), hint: `${w} – ${ans}` };
+};
+
+/* ---------------------------------------------------------------- geography + shape hunt */
+const LAND = [['🏔️', 'la montagne', 'the mountain'], ['🌋', 'le volcan', 'the volcano'], ['🏝️', 'l’île', 'the island'], ['🏜️', 'le désert', 'the desert'], ['🏖️', 'la plage', 'the beach'], ['🌲', 'la forêt', 'the forest'], ['🌊', 'la mer', 'the sea']];
+const HABS = [['🐧', 'le pingouin', 'the penguin', '❄️'], ['🐫', 'le chameau', 'the camel', '🏜️'], ['🐒', 'le singe', 'the monkey', '🌴'], ['🐟', 'le poisson', 'the fish', '🌊'], ['🐻', 'l’ours', 'the bear', '🌲'], ['🦀', 'le crabe', 'the crab', '🏖️'], ['🐢', 'la tortue de mer', 'the sea turtle', '🌊']];
+const HAB_ICONS = ['❄️', '🏜️', '🌴', '🌊', '🌲', '🏖️'];
+const CANADA = [
+  { fr: 'Quel est le drapeau du Canada ?', en: 'Which is the flag of Canada?', vis: '🍁', ans: '🇨🇦', d: ['🇺🇸', '🇫🇷', '🇧🇷'] },
+  { fr: 'Quelle feuille est sur le drapeau du Canada ?', en: 'Which leaf is on the flag of Canada?', vis: '🇨🇦', ans: '🍁', d: ['🍂', '🍃'] },
+  { fr: 'Quel animal est un symbole du Canada ?', en: 'Which animal is a symbol of Canada?', vis: '🍁', ans: '🦫', d: ['🐪', '🦒', '🐘'] },
+  { fr: 'Quelle est la capitale du Canada ?', en: 'What is the capital of Canada?', vis: '🍁', ans: 'Ottawa', d: ['Toronto', 'Calgary'] },
+  { fr: 'Quel pays est au sud du Canada ?', en: 'Which country is south of Canada?', vis: '🧭', ans: '🇺🇸', d: ['🇫🇷', '🇧🇷'] }
+];
+function compassSvg(deg) {
+  return `<svg viewBox="-60 -60 120 120" width="124" height="124" style="display:block;margin:0 auto"><circle r="56" fill="#fff" stroke="#3a2358" stroke-width="5"/><text x="0" y="-38" text-anchor="middle" font-size="16" font-weight="700" fill="#3a2358">N</text><g stroke="#3a2358" stroke-width="3"><line x1="0" y1="46" x2="0" y2="52"/><line x1="46" y1="0" x2="52" y2="0"/><line x1="-46" y1="0" x2="-52" y2="0"/></g><g transform="rotate(${deg})"><polygon points="0,-30 9,6 -9,6" fill="#ff5a5f" stroke="#3a2358" stroke-width="3" stroke-linejoin="round"/><rect x="-3" y="6" width="6" height="22" rx="3" fill="#3a2358"/></g><circle r="5" fill="#3a2358"/></svg>`;
+}
+GEN.geo = function (lv) {
+  const kinds = lv === 1 ? ['land', 'hab'] : lv === 2 ? ['hab', 'compass', 'land'] : ['canada', 'compass', 'hab'];
+  const k = pick(kinds), fr = fr_();
+  if (k === 'land') {
+    const [e, f, en] = pickFresh(LAND, 'land'), others = shuffle(LAND.filter((x) => x[0] !== e)).slice(0, 2), t = fr ? `Touche ${f} !` : `Tap ${en}!`;
+    return { vis: '<div class="pic">🗺️</div>', text: t, say: t, ans: e, opts: shuffle([[e, f, en]].concat(others)).map((x) => ({ val: x[0], label: x[0], say: fr ? x[1] : x[2] })), hint: fr ? f : en };
+  }
+  if (k === 'hab') {
+    const [a, f, en, h] = pickFresh(HABS, 'hab'), others = shuffle(HAB_ICONS.filter((x) => x !== h)).slice(0, 2), t = fr ? `Où vit ${f} ?` : `Where does ${en} live?`;
+    return { vis: `<div class="pic">${a}</div>`, text: t, say: t, ans: h, opts: shuffle([h].concat(others)).map((x) => ({ val: x, label: x, say: '' })), hint: h };
+  }
+  if (k === 'compass') {
+    const dirs = [['N', 0], ['E', 90], ['S', 180], [fr ? 'O' : 'W', 270]], [lab, deg] = pick(dirs), t = fr ? 'Où montre la flèche ?' : 'Where does the arrow point?';
+    return { vis: compassSvg(deg), text: t, say: fr ? 'Où montre la flèche ? Nord, est, sud ou ouest ?' : 'Where does the arrow point? North, east, south or west?', ans: lab, opts: shuffle(dirs).map(([l]) => ({ val: l, label: l, say: { N: fr ? 'nord' : 'north', E: fr ? 'est' : 'east', S: fr ? 'sud' : 'south', O: 'ouest', W: 'west' }[l] })), hint: lab };
+  }
+  const q = pickFresh(CANADA, 'canada'), t = q[L];
+  return { vis: `<div class="pic">${q.vis}</div>`, text: t, say: t, ans: q.ans, opts: shuffle([q.ans].concat(q.d.slice(0, 2))).map((x) => ({ val: x, label: x, say: x.length > 2 && !/\p{Extended_Pictographic}/u.test(x) ? x : '' })), hint: '' };
+};
+const HUNT = {
+  circle: { fr: 'un cercle', en: 'a circle', e: ['⚽', '🍪', '🌕', '🎾', '🪙', '🕒'] },
+  triangle: { fr: 'un triangle', en: 'a triangle', e: ['🍕', '⛺', '🔺'] },
+  square: { fr: 'un carré', en: 'a square', e: ['🧇', '🎁', '🪟'] },
+  rectangle: { fr: 'un rectangle', en: 'a rectangle', e: ['🚪', '📱', '📺', '✉️', '📖'] },
+  star: { fr: 'une étoile', en: 'a star', e: ['⭐', '🌟'] },
+  heart: { fr: 'un cœur', en: 'a heart', e: ['❤️', '💖'] }
+};
+GEN.hunt = function (lv) {
+  const pool = lv === 1 ? ['circle', 'triangle', 'square'] : ['circle', 'triangle', 'square', 'rectangle', 'star', 'heart'];
+  const id = pick(pool), ans = pick(HUNT[id].e), others = shuffle(pool.filter((x) => x !== id)).slice(0, lv === 1 ? 2 : 3).map((x) => pick(HUNT[x].e));
+  const t = fr_() ? `Touche ce qui ressemble à ${HUNT[id].fr} !` : `Tap what looks like ${HUNT[id].en}!`;
+  return { vis: shapeSvg(id, pick(['#ff7a8a', '#ffc93c', '#46d9a6', '#6fb7ff', '#a98bff'])), text: t, say: t, ans, opts: shuffle([ans].concat(others)).map((e) => ({ val: e, label: e, say: '' })), hint: '' };
 };

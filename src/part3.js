@@ -18,7 +18,7 @@ const PALS = {
 };
 PALS.race = PALS.drive;
 PALS.sub = PALS.add; PALS.compare = PALS.numbers; PALS.clock = PALS.count; PALS.shapes = PALS.colors; PALS.pattern = PALS.numbers; PALS.sight = PALS.letters; PALS.syl = PALS.first; PALS.rhyme = PALS.place;
-PALS.story = PALS.place;
+PALS.story = PALS.place; PALS.geo = PALS.drive; PALS.hunt = PALS.colors;
 const pal = PALS.menu.map(hex), palTo = pal.map((c) => c.slice());
 function setPal(name) { PALS[name].map(hex).forEach((c, i) => { palTo[i] = c; }); }
 const BLOB_COLORS = ['#ff7aa8', '#ffc93c', '#46d9a6', '#ff9a4d', '#9b7bff', '#4cc9f0'];
@@ -438,13 +438,13 @@ function drawParts(dt) {
 /* ---------------------------------------------------------------- game state */
 const MODEDEF = {
   count: { gen: 'count', kind: 'shoot' }, numbers: { gen: 'numbers', kind: 'shoot' }, add: { gen: 'add', kind: 'shoot' }, letters: { gen: 'letters', kind: 'shoot' },
-  first: { gen: 'first', kind: 'shoot' }, colors: { gen: 'colors', kind: 'shoot' }, drive: { gen: 'drive', kind: 'drive' }, race: { gen: 'race', kind: 'race' }, sub: { gen: 'sub', kind: 'shoot' }, compare: { gen: 'compare', kind: 'shoot' }, clock: { gen: 'clock', kind: 'shoot' }, shapes: { gen: 'shapes', kind: 'shoot' }, pattern: { gen: 'pattern', kind: 'shoot' }, sight: { gen: 'sight', kind: 'shoot' }, syl: { gen: 'syl', kind: 'shoot' }, rhyme: { gen: 'rhyme', kind: 'shoot' }, place: { gen: 'place', kind: 'place' }
+  first: { gen: 'first', kind: 'shoot' }, colors: { gen: 'colors', kind: 'shoot' }, drive: { gen: 'drive', kind: 'drive' }, race: { gen: 'race', kind: 'race' }, sub: { gen: 'sub', kind: 'shoot' }, compare: { gen: 'compare', kind: 'shoot' }, clock: { gen: 'clock', kind: 'shoot' }, shapes: { gen: 'shapes', kind: 'shoot' }, pattern: { gen: 'pattern', kind: 'shoot' }, sight: { gen: 'sight', kind: 'shoot' }, syl: { gen: 'syl', kind: 'shoot' }, rhyme: { gen: 'rhyme', kind: 'shoot' }, geo: { gen: 'geo', kind: 'shoot' }, hunt: { gen: 'hunt', kind: 'shoot' }, place: { gen: 'place', kind: 'place' }
 };
 const car = { x: 0, y: 0, rot: 0, mode: 'wait', b: null, t0: 0, dur: 1, hx: 0, hy: 0, jy: 0 };
 function kindNow() { return S.screen === 'play' && S.mode && MODEDEF[S.mode] ? MODEDEF[S.mode].kind : 'shoot'; }
 const S = { adv: null, advView: 'intro', advIdx: 0, stNext: null, friendHop: -9, screen: 'splash', mode: null, q: null, tries: 0, canTap: false, done: false, idle: 0, nudged: false, round: null, pendingSticker: false, greeted: false, shotTimer: 0, qid: 0 };
 const MODES = ['count', 'numbers', 'add', 'letters', 'first', 'drive', 'place', 'colors'];
-const screens = { splash: $('splash'), menu: $('menu'), roundend: $('roundend'), sticker: $('stickerscr'), album: $('albumscr'), adv: $('advscr'), trophy: $('trophyscr'), shop: $('shopscr'), cat: $('catscr'), path: $('pathscr'), paint: $('paintscr'), story: $('storyscr') };
+const screens = { splash: $('splash'), menu: $('menu'), roundend: $('roundend'), sticker: $('stickerscr'), album: $('albumscr'), adv: $('advscr'), trophy: $('trophyscr'), shop: $('shopscr'), cat: $('catscr'), settings: $('settingsscr'), path: $('pathscr'), paint: $('paintscr'), story: $('storyscr') };
 
 function applyLang() {
   document.documentElement.lang = L;
@@ -453,7 +453,7 @@ function applyLang() {
   $('l-fr').setAttribute('aria-pressed', String(L === 'fr')); $('l-en').setAttribute('aria-pressed', String(L === 'en'));
   document.title = L === 'fr' ? 'Zip et les Gloops' : 'Zip & the Gloops';
   $('starn').textContent = balance();
-  renderPips(); if (S.screen === 'album') renderAlbum(); if (S.screen === 'adv') renderAdv(S.advView); if (S.screen === 'trophy') Prog.render(); if (S.screen === 'shop') renderShop(); if (S.screen === 'story') storyList(); if (S.screen === 'path') renderPath(S.pathView, false); if (S.screen === 'cat') openCat(S.cat); Prog.updateBtn();
+  renderPips(); if (S.screen === 'album') renderAlbum(); if (S.screen === 'adv') renderAdv(S.advView); if (S.screen === 'trophy') Prog.render(); if (S.screen === 'shop') renderShop(); if (S.screen === 'story') storyList(); if (S.screen === 'path') renderPath(S.pathView, false); if (S.screen === 'cat') openCat(S.cat); if (S.screen === 'settings') renderSettings(); Prog.updateBtn();
 }
 function renderPips() {
   if (typeof updatePlayBtn === 'function') updatePlayBtn();
@@ -1148,7 +1148,7 @@ function wPick(cands, used) {
 }
 function genPath() {
   const used = new Set(), steps = [];
-  for (const k of ['math', 'read', 'math', 'read', 'fun']) { const m = wPick(k === 'fun' ? ['drive', 'race', 'colors', 'story'] : CAT_ORDER[k], used); used.add(m); steps.push(m); }
+  for (const k of ['math', 'read', 'math', 'read', 'fun']) { const m = wPick(k === 'fun' ? ['drive', 'race', 'colors', 'geo', 'hunt', 'story'] : CAT_ORDER[k], used); used.add(m); steps.push(m); }
   return steps;
 }
 function ensurePath(force) {
@@ -1203,6 +1203,33 @@ function pathStepDone(skip) {
 $('playbtn').addEventListener('click', () => { Snd.unlock(); Snd.click(); openPath(); });
 $('path-go').addEventListener('click', () => { Snd.click(); gate(() => { if (S.pathView === 'done') { ensurePath(true); const say = renderPath('step', false); Voice.say(say); } else startPathStep(); }); });
 $('path-back').addEventListener('click', () => { Snd.click(); goMenu(); });
+
+/* ---------------------------------------------------------------- settings */
+function renderSettings() {
+  $('st-music').setAttribute('aria-pressed', String(Snd.on)); $('st-voice').setAttribute('aria-pressed', String(Snd.voiceOn));
+  $('st-ver').textContent = UI[L].ver + ' ' + APP_VERSION;
+}
+function openSettings() { show('settings'); $('st-status').textContent = ''; renderSettings(); }
+async function checkUpdate() {
+  const el = $('st-status'), btn = $('st-update'); el.textContent = UI[L].upd_checking; btn.disabled = true;
+  try {
+    if (!/^https?:/.test(location.protocol)) { el.textContent = UI[L].upd_na; return; }
+    const r = await fetch('index.html?nocache=' + Date.now(), { cache: 'no-store' });
+    if (!r.ok) throw new Error('http ' + r.status);
+    const m = (await r.text()).match(/APP_VERSION = '([^']+)'/);
+    if (!m) throw new Error('no version');
+    if (m[1] !== APP_VERSION) {
+      el.textContent = UI[L].upd_new;
+      try { if ('serviceWorker' in navigator) { const reg = await navigator.serviceWorker.getRegistration(); if (reg) await reg.update(); } if (window.caches) { const ks = await caches.keys(); await Promise.all(ks.map((k) => caches.delete(k))); } } catch (e) { /* ignore */ }
+      setTimeout(() => location.reload(), 900);
+    } else el.textContent = UI[L].upd_ok;
+  } catch (e) { el.textContent = UI[L].upd_fail; } finally { btn.disabled = false; }
+}
+$('settingsbtn').addEventListener('click', () => { Snd.unlock(); Snd.click(); openSettings(); });
+$('st-music').addEventListener('click', () => { Snd.unlock(); Snd.setMusic(!Snd.on); Snd.click(); renderSettings(); sndSync(); });
+$('st-voice').addEventListener('click', () => { Snd.unlock(); const on = !Snd.voiceOn; Snd.setVoice(on); if (!on) Voice.stop(); Snd.click(); renderSettings(); sndSync(); if (on) Voice.say(L === 'fr' ? 'Salut !' : 'Hi!'); });
+$('st-update').addEventListener('click', () => { Snd.click(); checkUpdate(); });
+$('st-back').addEventListener('click', () => { Snd.click(); goMenu(); });
 
 function tickFrame(now) {
   const dt = Math.min(0.05, (now - last) / 1000); last = now; T += dt;
