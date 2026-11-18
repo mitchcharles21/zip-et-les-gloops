@@ -108,8 +108,30 @@ function detRelease(e) {
   const b = det.moved < 12 ? near(e.clientX, e.clientY, (q) => q.r * 1.1) : near(det.x, det.y, () => det.r * 0.85);
   if (b) detAnswer(b);
 }
+const spaceStars = Array.from({ length: 70 }, () => ({ x: Math.random(), y: Math.random(), r: 0.8 + Math.random() * 2, p: Math.random() * 6, s: 0.5 + Math.random() * 1.5 }));
+const spaceFly = [{ e: '🚀', x: 0.2, y: 0.38, v: 9, a: -0.6, sz: 34 }, { e: '🛰️', x: 0.8, y: 0.5, v: -6, a: 0, sz: 30 }, { e: '🚀', x: 0.65, y: 0.7, v: 7, a: -0.4, sz: 26 }];
+function drawSpace(dt) {
+  const g = ctx.createLinearGradient(0, 0, 0, H); g.addColorStop(0, '#120a3a'); g.addColorStop(0.6, '#2a1b6e'); g.addColorStop(1, '#4a2a8a');
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  const neb = (x, y, r, c) => { const n = ctx.createRadialGradient(x, y, 0, x, y, r); n.addColorStop(0, c); n.addColorStop(1, 'rgba(0,0,0,0)'); ctx.fillStyle = n; ctx.fillRect(x - r, y - r, r * 2, r * 2); };
+  neb(W * 0.2, H * 0.3, 190, 'rgba(255,90,170,.22)'); neb(W * 0.85, H * 0.6, 220, 'rgba(80,160,255,.2)');
+  for (const s of spaceStars) { ctx.globalAlpha = 0.4 + 0.6 * Math.abs(Math.sin(T * s.s + s.p)); ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(s.x * W, s.y * H, s.r, 0, 7); ctx.fill(); }
+  ctx.globalAlpha = 1;
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  for (const f of spaceFly) {
+    f.x += (f.v / W) * dt * 4; if (f.x > 1.1) f.x = -0.1; if (f.x < -0.1) f.x = 1.1;
+    ctx.save(); ctx.translate(f.x * W, f.y * H + Math.sin(T * 1.3 + f.x * 9) * 6); ctx.rotate(f.v > 0 ? f.a : 0); ctx.globalAlpha = 0.9;
+    ctx.font = `${f.sz}px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif`; ctx.fillStyle = '#fff'; ctx.fillText(f.e, 0, 0); ctx.restore();
+  }
+  // faint moon planet and ground glow
+  ctx.fillStyle = 'rgba(255,255,255,.1)'; ctx.beginPath(); ctx.arc(W * 0.1, H * 0.85, 60, 0, 7); ctx.fill();
+  const hg = ctx.createLinearGradient(0, H * 0.84, 0, H); hg.addColorStop(0, '#5b3fb0'); hg.addColorStop(1, '#2b1a66');
+  ctx.fillStyle = hg; ctx.strokeStyle = INK; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(-10, H + 10);
+  for (let x = -10; x <= W + 10; x += 10) ctx.lineTo(x, H * 0.86 + Math.sin(x * 0.02) * 10); ctx.lineTo(W + 10, H + 10); ctx.closePath(); ctx.fill(); ctx.stroke();
+}
 function drawBackground(dt) {
   if (kindNow() === 'race') return;
+  if (S.screen === 'play' && S.mode === 'planets') { drawSpace(dt); return; }
   if (kindNow() === 'drive') { drawField(dt); return; }
   for (let i = 0; i < 4; i++) for (let k = 0; k < 3; k++) pal[i][k] += (palTo[i][k] - pal[i][k]) * Math.min(1, dt * 3);
   const g = ctx.createLinearGradient(0, 0, 0, H);
@@ -502,6 +524,14 @@ function drawZip() {
   ctx.beginPath(); ctx.moveTo(-R * 1.12, R * 0.34); ctx.lineTo(R * 1.12, R * 0.34); ctx.quadraticCurveTo(R * 0.95, R * 1.24, 0, R * 1.24); ctx.quadraticCurveTo(-R * 0.95, R * 1.24, -R * 1.12, R * 0.34); ctx.closePath(); ctx.fill(); ctx.stroke();
   ctx.fillStyle = '#fffaf0'; rr(ctx, -R * 1.18, R * 0.28, R * 2.36, R * 0.2, R * 0.1); ctx.fill(); ctx.stroke();
   ctx.fillStyle = '#ffc93c'; for (const s of [-1, 0, 1]) { ctx.beginPath(); ctx.arc(s * R * 0.5, R * 0.75, 5, 0, 7); ctx.fill(); ctx.stroke(); }
+  if (S.mode === 'planets' && S.screen === 'play') {
+    ctx.save(); ctx.fillStyle = 'rgba(190,235,255,.28)'; ctx.strokeStyle = INK; ctx.lineWidth = 5;
+    ctx.beginPath(); ctx.arc(0, -R * 0.02, R * 1.16, 0, 7); ctx.fill(); ctx.stroke();
+    ctx.strokeStyle = 'rgba(255,255,255,.85)'; ctx.lineWidth = 6; ctx.beginPath(); ctx.arc(0, -R * 0.02, R * 0.96, Math.PI * 1.12, Math.PI * 1.45); ctx.stroke();
+    ctx.fillStyle = '#e8eefc'; ctx.strokeStyle = INK; ctx.lineWidth = 5; rr(ctx, -R * 0.78, R * 0.2, R * 1.56, R * 0.2, R * 0.1); ctx.fill(); ctx.stroke();
+    ctx.strokeStyle = INK; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(R * 0.75, -R * 0.95); ctx.lineTo(R * 0.95, -R * 1.35); ctx.stroke();
+    ctx.fillStyle = '#ff6b6b'; ctx.beginPath(); ctx.arc(R * 0.95, -R * 1.38, 6, 0, 7); ctx.fill(); ctx.stroke(); ctx.restore();
+  }
   drawHat(save.shop.eq.hat, R);
   ctx.restore();
 }
