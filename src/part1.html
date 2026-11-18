@@ -291,10 +291,15 @@ button.chip:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--ink);
 .setrow .si { font-size: 22px; } .setrow span:nth-child(2) { flex: 1; text-align: left; }
 .setnote { margin: 0; font-size: 15px; opacity: .8; text-align: center; min-height: 1.2em; }
 .setinp { width: 100%; box-sizing: border-box; font: inherit; font-size: 20px; font-weight: 700; text-align: center; color: var(--ink); background: #fff; border: 3px solid var(--ink); border-radius: 16px; padding: 8px 10px; min-height: 46px; }
-#settingsscr { gap: 12px; } #settingsscr .panel { gap: 8px; max-height: 100%; overflow-y: auto; } #settingsscr .panel h2 { font-size: 28px; } #st-update { font-size: 18px; padding: 8px 12px; min-height: 0; }
+#settingsscr { gap: 12px; } #settingsscr .panel { gap: 8px; max-height: 100%; overflow-y: auto; } #settingsscr .panel h2 { font-size: 28px; } #st-update, #st-add { font-size: 18px; padding: 8px 12px; min-height: 0; }
 .tg { display: block; width: 46px; height: 26px; border-radius: 13px; border: 3px solid var(--ink); background: #d8d0e8; position: relative; flex: 0 0 auto; box-sizing: border-box; transition: background .15s; }
 .tg::after { content: ''; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; box-sizing: border-box; border-radius: 50%; background: #fff; border: 2px solid var(--ink); transition: transform .15s; }
 [aria-pressed="true"] > .tg { background: var(--mint); } [aria-pressed="true"] > .tg::after { transform: translateX(20px); }
+.profs { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; width: 100%; }
+.pchip { min-height: 44px; padding: 6px 14px; border: 3px solid var(--ink); border-radius: 22px; background: #fff; font-size: 18px; font-weight: 700; box-shadow: 0 3px 0 var(--ink); }
+.pchip[aria-pressed="true"] { background: var(--mint); }
+#who { display: flex; flex-direction: column; align-items: center; gap: 6px; } #who[hidden] { display: none; } #who small { font-size: 18px; font-weight: 700; }
+.setrow[hidden] { display: none; } .setrow.armed { background: #ffd0d0; }
 </style>
 
 <canvas id="cv" aria-label="Game scene"></canvas>
@@ -325,6 +330,7 @@ button.chip:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--ink);
 <section class="screen" id="splash">
   <h1 class="logo">Zip<small data-i18n="logo2">et les Gloops</small></h1>
   <button class="btn pulse" id="start" type="button" data-i18n="start">Jouer !</button>
+  <div id="who" hidden><small data-i18n="who">Qui joue ?</small><div class="profs" id="who-profs"></div></div>
 </section>
 
 <section class="screen" id="menu" hidden>
@@ -411,8 +417,10 @@ button.chip:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--ink);
 <section class="screen" id="settingsscr" hidden>
   <div class="panel">
     <h2 data-i18n="settings" style="margin:0">Réglages</h2>
-    <div class="setgrp"><b data-i18n="st_name">Prénom</b>
+    <div class="setgrp"><b data-i18n="st_player">Joueur</b>
+      <div class="profs" id="st-profs"></div>
       <input id="st-name" class="setinp" type="text" maxlength="12" autocomplete="off" autocapitalize="words" spellcheck="false" data-ph="name_ph">
+      <button class="btn alt small" id="st-add" type="button" data-i18n="add_player">➕ Nouveau joueur</button>
     </div>
     <div class="setgrp"><b data-i18n="st_sound">Son</b>
       <button type="button" class="setrow" id="st-music" aria-pressed="true"><span class="si">🎵</span><span data-i18n="snd_music">Musique</span><i class="tg"></i></button>
@@ -422,6 +430,11 @@ button.chip:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--ink);
       <button class="btn small" id="st-update" type="button" data-i18n="upd_btn">Chercher une mise à jour</button>
       <p id="st-status" class="setnote"></p>
       <p class="setnote" id="st-ver"></p>
+    </div>
+    <div class="setgrp"><b data-i18n="st_data">Progression</b>
+      <button type="button" class="setrow danger" id="st-reset"><span class="si">🧹</span><span data-i18n="reset">Effacer la progression</span></button>
+      <button type="button" class="setrow danger" id="st-del" hidden><span class="si">🗑️</span><span data-i18n="del_player">Supprimer ce joueur</span></button>
+      <p id="st-warn" class="setnote"></p>
     </div>
     <button type="button" class="setrow" id="st-claude"><span class="si">💛</span><span data-i18n="made_with">Fait avec Claude</span><span class="si">🔊</span></button>
     <button class="btn alt small" id="st-back" type="button" data-i18n="menu">Menu</button>

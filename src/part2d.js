@@ -1,9 +1,9 @@
 
 /* ---------------------------------------------------------------- 1st-grade skills, menu meta, path text */
-const APP_VERSION = '2026-11-18.10';
+const APP_VERSION = '2026-11-18.12';
 const G1 = ['sub', 'compare', 'clock', 'shapes', 'pattern', 'sight', 'syl', 'rhyme'];
 const MODES_G1 = G1;
-const MODES_ALL = MODES7.concat(G1, ['geo', 'hunt']);
+const MODES_ALL = MODES7.concat(G1, ['geo', 'hunt', 'planets']);
 const MODE_META = {
   count: { ico: '🍎', cls: 'm1', cat: 'math', d: { fr: 'Compte les objets', en: 'Count the objects' } },
   numbers: { ico: '7', cls: 'm2', cat: 'math', d: { fr: 'Reconnais les nombres', en: 'Find the numbers' } },
@@ -22,18 +22,19 @@ const MODE_META = {
   drive: { ico: '🚗', cls: 'm6', cat: 'fun', d: { fr: 'Conduis vers la bonne réponse', en: 'Drive to the right answer' } },
   race: { ico: '🏎️', cls: 'm9', cat: 'fun', d: { fr: 'Course : bonnes réponses = vitesse', en: 'Race: right answers = speed' } },
   colors: { ico: '🎨', cls: 'm8', cat: 'disc', d: { fr: 'Apprends les couleurs', en: 'Learn the colors' } },
+  planets: { ico: '🪐', bg: '#cbb8ff', cat: 'disc', d: { fr: 'Voyage dans l’espace', en: 'Travel through space' } },
   geo: { ico: '🌍', bg: '#8fd7a8', cat: 'disc', d: { fr: 'Découvre le monde', en: 'Discover the world' } },
   hunt: { ico: '🔍', bg: '#b9d8ff', cat: 'disc', d: { fr: 'Trouve les formes autour de toi', en: 'Find shapes around you' } },
   story: { ico: '📖', bg: '#ffd9a0', cat: 'fun', d: { fr: 'Lis une histoire', en: 'Read a story' } }
 };
-const CAT_ORDER = { math: ['count', 'numbers', 'add', 'sub', 'compare', 'pattern', 'clock', 'shapes'], read: ['letters', 'first', 'place', 'sight', 'syl', 'rhyme'], fun: ['drive', 'race'], disc: ['colors', 'geo', 'hunt'] };
+const CAT_ORDER = { math: ['count', 'numbers', 'add', 'sub', 'compare', 'pattern', 'clock', 'shapes'], read: ['letters', 'first', 'place', 'sight', 'syl', 'rhyme'], fun: ['drive', 'race'], disc: ['colors', 'geo', 'hunt', 'planets'] };
 Object.assign(UI.fr, {
   m_sub: 'Soustractions', m_compare: 'Plus ou moins', m_clock: 'L’heure', m_shapes: 'Les formes', m_pattern: 'Les suites', m_sight: 'Mots usuels', m_syl: 'Syllabes', m_rhyme: 'Les rimes', m_story: 'Histoire',
-  cat_math: 'Maths', cat_read: 'Lecture', cat_fun: 'Jeux', cat_disc: 'Découvrir', st_name: 'Prénom', name_ph: 'Écris ton prénom', hi_name: (n) => `Salut ${n} !`, made_with: 'Fait avec Claude', claude_say: 'Salut ! C’est Claude. J’ai aidé à faire ce jeu pour toi. Amuse-toi bien !', m_geo: 'Le monde', m_hunt: 'Chasse aux formes', settings: 'Réglages', upd_btn: 'Chercher une mise à jour', upd_checking: 'Vérification…', upd_ok: 'Le jeu est à jour ✓', upd_new: 'Nouvelle version ! Mise à jour…', upd_fail: 'Impossible de vérifier (pas de connexion ?)', upd_na: 'La mise à jour marche seulement sur le site web', ver: 'Version', st_updates: 'Mises à jour', st_sound: 'Son', play: 'Jouer', play_sub: 'Le parcours du jour', path_title: 'Le parcours de Zip', path_more: 'Un autre parcours', path_menu: 'Menu'
+  cat_math: 'Maths', cat_read: 'Lecture', cat_fun: 'Jeux', cat_disc: 'Découvrir', m_planets: 'Planètes', st_player: 'Joueur', add_player: '➕ Nouveau joueur', who: 'Qui joue ?', st_data: 'Progression', reset: 'Effacer la progression', del_player: 'Supprimer ce joueur', sure: 'Sûr ? Touche encore', nostore: 'Ce navigateur ne garde pas la progression (mode privé ?)', pl_player: 'Joueur', st_name: 'Prénom', name_ph: 'Écris ton prénom', hi_name: (n) => `Salut ${n} !`, made_with: 'Fait avec Claude', claude_say: 'Salut ! C’est Claude. J’ai aidé à faire ce jeu pour toi. Amuse-toi bien !', m_geo: 'Le monde', m_hunt: 'Chasse aux formes', settings: 'Réglages', upd_btn: 'Chercher une mise à jour', upd_checking: 'Vérification…', upd_ok: 'Le jeu est à jour ✓', upd_new: 'Nouvelle version ! Mise à jour…', upd_fail: 'Impossible de vérifier (pas de connexion ?)', upd_na: 'La mise à jour marche seulement sur le site web', ver: 'Version', st_updates: 'Mises à jour', st_sound: 'Son', play: 'Jouer', play_sub: 'Le parcours du jour', path_title: 'Le parcours de Zip', path_more: 'Un autre parcours', path_menu: 'Menu'
 });
 Object.assign(UI.en, {
   m_sub: 'Subtracting', m_compare: 'More or less', m_clock: 'Clock', m_shapes: 'Shapes', m_pattern: 'Patterns', m_sight: 'Sight words', m_syl: 'Syllables', m_rhyme: 'Rhymes', m_story: 'Story',
-  cat_math: 'Math', cat_read: 'Reading', cat_fun: 'Games', cat_disc: 'Discover', st_name: 'Name', name_ph: 'Type your name', hi_name: (n) => `Hi ${n}!`, made_with: 'Made with Claude', claude_say: 'Hi! It’s Claude. I helped make this game for you. Have fun!', m_geo: 'My world', m_hunt: 'Shape hunt', settings: 'Settings', upd_btn: 'Check for updates', upd_checking: 'Checking…', upd_ok: 'The game is up to date ✓', upd_new: 'New version! Updating…', upd_fail: 'Could not check (no connection?)', upd_na: 'Updates only work on the website', ver: 'Version', st_updates: 'Updates', st_sound: 'Sound', play: 'Play', play_sub: 'Today’s path', path_title: 'Zip’s path', path_more: 'Another path', path_menu: 'Menu'
+  cat_math: 'Math', cat_read: 'Reading', cat_fun: 'Games', cat_disc: 'Discover', m_planets: 'Planets', st_player: 'Player', add_player: '➕ New player', who: 'Who is playing?', st_data: 'Progress', reset: 'Erase progress', del_player: 'Delete this player', sure: 'Sure? Tap again', nostore: 'This browser is not saving progress (private mode?)', pl_player: 'Player', st_name: 'Name', name_ph: 'Type your name', hi_name: (n) => `Hi ${n}!`, made_with: 'Made with Claude', claude_say: 'Hi! It’s Claude. I helped make this game for you. Have fun!', m_geo: 'My world', m_hunt: 'Shape hunt', settings: 'Settings', upd_btn: 'Check for updates', upd_checking: 'Checking…', upd_ok: 'The game is up to date ✓', upd_new: 'New version! Updating…', upd_fail: 'Could not check (no connection?)', upd_na: 'Updates only work on the website', ver: 'Version', st_updates: 'Updates', st_sound: 'Sound', play: 'Play', play_sub: 'Today’s path', path_title: 'Zip’s path', path_more: 'Another path', path_menu: 'Menu'
 });
 const PX = {
   fr: { step: (n, t, name, d) => `Étape ${n} sur ${t} : ${name}. ${d} !`, nice: ['Bravo', 'Super', 'Génial', 'Bien joué'], done: `Parcours terminé ! Reviens demain pour un nouveau parcours !`, sub: (i, t) => i >= t ? 'Parcours terminé ✓' : `Étape ${i + 1} sur ${t}`, doneT: '🎉 Parcours terminé !', doneS: (s) => `+${s} ⭐` },
@@ -248,4 +249,44 @@ GEN.hunt = function (lv) {
   const id = pick(pool), ans = pick(HUNT[id].e), others = shuffle(pool.filter((x) => x !== id)).slice(0, lv === 1 ? 2 : 3).map((x) => pick(HUNT[x].e));
   const t = fr_() ? `Touche ce qui ressemble à ${HUNT[id].fr} !` : `Tap what looks like ${HUNT[id].en}!`;
   return { vis: shapeSvg(id, pick(['#ff7a8a', '#ffc93c', '#46d9a6', '#6fb7ff', '#a98bff'])), text: t, say: t, ans, opts: shuffle([ans].concat(others)).map((e) => ({ val: e, label: e, say: '' })), hint: '' };
+};
+
+/* ---------------------------------------------------------------- planets */
+const PL = {
+  mercury: ['Mercure', 'Mercury', '#b8a99a', 5], venus: ['Vénus', 'Venus', '#f2c27b', 7], earth: ['Terre', 'Earth', '#4aa3ff', 7.5], mars: ['Mars', 'Mars', '#e0553d', 6],
+  jupiter: ['Jupiter', 'Jupiter', '#d9a066', 14], saturn: ['Saturne', 'Saturn', '#e8d08a', 11], uranus: ['Uranus', 'Uranus', '#7fe0e0', 9], neptune: ['Neptune', 'Neptune', '#4a63e0', 9]
+};
+const PL_ORDER = ['mercury', 'venus', 'earth', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune'];
+const PL_FACTS = [
+  ['Quelle planète a des anneaux ?', 'Which planet has rings?', 'saturn'], ['Quelle planète est rouge ?', 'Which planet is red?', 'mars'],
+  ['Quelle est la plus grosse planète ?', 'Which planet is the biggest?', 'jupiter'], ['Quelle planète est notre maison ?', 'Which planet is our home?', 'earth'],
+  ['Quelle planète est la plus proche du Soleil ?', 'Which planet is closest to the Sun?', 'mercury'], ['Quelle planète est la plus chaude ?', 'Which planet is the hottest?', 'venus'],
+  ['Quelle planète est bleue et très loin ?', 'Which planet is blue and very far away?', 'neptune']
+];
+const SKY = [['☀️', 'le Soleil', 'the Sun'], ['🌙', 'la Lune', 'the Moon'], ['🌍', 'la Terre', 'the Earth'], ['⭐', 'une étoile', 'a star'], ['🪐', 'Saturne', 'Saturn'], ['🚀', 'la fusée', 'the rocket']];
+const FR_ORD = ['première', 'deuxième', 'troisième', 'quatrième', 'cinquième', 'sixième', 'septième', 'huitième'];
+const EN_ORD = ['first', 'second', 'third', 'fourth', 'fifth', 'sixth', 'seventh', 'eighth'];
+function solarSvg(hi) {
+  let g = '<circle cx="22" cy="35" r="18" fill="#ffc93c" stroke="#3a2358" stroke-width="3"/>';
+  PL_ORDER.forEach((id, i) => {
+    const x = 56 + i * 30, r = PL[id][3];
+    if (i === hi) g += `<circle cx="${x}" cy="35" r="11" fill="#fff" stroke="#3a2358" stroke-width="3" stroke-dasharray="4 3"/><text x="${x}" y="40" text-anchor="middle" font-size="14" font-weight="700" fill="#3a2358">?</text>`;
+    else g += `<circle cx="${x}" cy="35" r="${r}" fill="${PL[id][2]}" stroke="#3a2358" stroke-width="2.5"/>` + (id === 'saturn' ? `<ellipse cx="${x}" cy="35" rx="${r + 5}" ry="3.5" fill="none" stroke="#3a2358" stroke-width="2"/>` : '');
+  });
+  return `<svg viewBox="0 0 300 70" width="270" height="63" style="display:block;margin:0 auto" aria-hidden="true">${g}</svg>`;
+}
+GEN.planets = function (lv) {
+  const fr = fr_(), kind = pick(lv === 1 ? ['sky'] : lv === 2 ? ['fact', 'sky', 'fact'] : ['order', 'fact', 'order']);
+  const nameOf = (id) => PL[id][fr ? 0 : 1];
+  const planetOpts = (ans) => shuffle([ans].concat(shuffle(PL_ORDER.filter((x) => x !== ans)).slice(0, 2))).map((id) => ({ val: id, label: nameOf(id), say: nameOf(id) }));
+  if (kind === 'sky') {
+    const [e, f, en] = pickFresh(SKY, 'sky'), others = shuffle(SKY.filter((x) => x[0] !== e)).slice(0, 2), t = fr ? `Touche ${f} !` : `Tap ${en}!`;
+    return { vis: '<div class="pic">🔭</div>', text: t, say: t, ans: e, opts: shuffle([[e, f, en]].concat(others)).map((x) => ({ val: x[0], label: x[0], say: fr ? x[1] : x[2] })), hint: fr ? f : en };
+  }
+  if (kind === 'fact') {
+    const q = pickFresh(PL_FACTS, 'plfact'), t = fr ? q[0] : q[1];
+    return { vis: '<div class="pic">🪐</div>', text: t, say: t, ans: q[2], opts: planetOpts(q[2]), hint: nameOf(q[2]) };
+  }
+  const i = pick([1, 2, 3, 4, 5, 6, 7].filter((k) => lv > 2 || k < 5)), id = PL_ORDER[i], t = fr ? `Quelle planète est la ${FR_ORD[i]} depuis le Soleil ?` : `Which planet is ${EN_ORD[i]} from the Sun?`;
+  return { vis: solarSvg(i), text: t, say: t, ans: id, opts: planetOpts(id), hint: nameOf(id) };
 };

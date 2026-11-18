@@ -10,9 +10,23 @@ const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const lerp = (a, b, t) => a + (b - a) * t;
 
 /* ---------------------------------------------------------------- save */
-const SAVE_KEY = 'zip-gloops-v1';
+let storageOK = true, noPersist = false;
+try { localStorage.setItem('zip-test', '1'); storageOK = localStorage.getItem('zip-test') === '1'; localStorage.removeItem('zip-test'); } catch (e) { storageOK = false; }
+const IDX_KEY = 'zip-gloops-profiles';
+const prof = (() => {
+  let idx = null;
+  try { idx = JSON.parse(localStorage.getItem(IDX_KEY) || 'null'); } catch (e) { idx = null; }
+  const list = idx && Array.isArray(idx.list) ? idx.list.filter((p) => p && typeof p.id === 'string' && /^[a-z0-9]{1,16}$/i.test(p.id)).map((p) => ({ id: p.id, name: typeof p.name === 'string' ? p.name.slice(0, 12) : '' })) : [];
+  if (!list.length) list.push({ id: 'p1', name: '' });
+  const act = idx && list.some((p) => p.id === idx.act) ? idx.act : list[0].id;
+  return { act, list };
+})();
+const keyOf = (id) => (id === 'p1' ? 'zip-gloops-v1' : 'zip-gloops-' + id);
+const SAVE_KEY = keyOf(prof.act);
+const saveIdx = () => { try { localStorage.setItem(IDX_KEY, JSON.stringify(prof)); } catch (e) { storageOK = false; } };
+const meProf = () => prof.list.find((p) => p.id === prof.act);
 const save = {
-  lang: 'fr', music: true, voice: true, stars: 0, stickers: 0, lv: { count: 1, numbers: 1, add: 1, letters: 1, first: 1, drive: 1, place: 1, colors: 1, race: 1, sub: 1, compare: 1, clock: 1, shapes: 1, pattern: 1, sight: 1, syl: 1, rhyme: 1, geo: 1, hunt: 1 },
+  lang: 'fr', music: true, voice: true, stars: 0, stickers: 0, lv: { count: 1, numbers: 1, add: 1, letters: 1, first: 1, drive: 1, place: 1, colors: 1, race: 1, sub: 1, compare: 1, clock: 1, shapes: 1, pattern: 1, sight: 1, syl: 1, rhyme: 1, geo: 1, hunt: 1, planets: 1 },
   st: { right: 0, first: 0, rounds: 0, perfect: 0, best: 0, place: 0, drive: 0, chals: 0, alldays: 0, adv: 0, bought: 0, race: 0, art: 0, stories: 0, paths: 0, mode: {} },
   spent: 0, shop: { owned: {}, eq: { hat: '', glasses: '', zip: 'blue', car: 'red' } },
   ach: {}, day: null, dayStreak: { last: '', n: 0 }, adv: { stop: 0, friends: [] }, acc: {}, path: null, name: ''
@@ -42,11 +56,13 @@ try {
     if (d.adv && typeof d.adv === 'object') { save.adv.stop = clamp(d.adv.stop | 0, 0, 4); if (Array.isArray(d.adv.friends)) save.adv.friends = d.adv.friends.filter((x) => typeof x === 'string'); }
   }
 } catch (e) { /* storage unavailable: play without saving */ }
+{ const m = meProf(); if (m.name) save.name = m.name; else m.name = save.name || ''; saveIdx(); }
+function setName(v) { save.name = v; meProf().name = v; saveIdx(); persist(); }
 function nameLine(line, always) {
   if (!save.name || (!always && Math.random() > 0.4)) return line;
   return line.replace(/\s*[!.]\s*$/, '') + ', ' + save.name + ' !';
 }
-const persist = () => { try { localStorage.setItem(SAVE_KEY, JSON.stringify(save)); } catch (e) { /* ignore */ } };
+const persist = () => { if (noPersist) return; try { localStorage.setItem(SAVE_KEY, JSON.stringify(save)); } catch (e) { storageOK = false; } };
 let L = save.lang;
 
 /* ---------------------------------------------------------------- text */
