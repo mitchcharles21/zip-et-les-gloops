@@ -87,7 +87,7 @@ function drawDetect(dt) {
     ctx.restore();
   }
   const dark = 0.9 * (1 - det.open);
-  if (dark > 0.01) { ctx.save(); ctx.fillStyle = `rgba(34,20,66,${dark})`; ctx.beginPath(); ctx.rect(0, 0, W, H); ctx.arc(det.x, det.y, lr, 0, 7, true); ctx.fill('evenodd'); ctx.restore(); }
+  if (dark > 0.01) { ctx.save(); ctx.fillStyle = `rgba(34,20,66,${dark})`; ctx.beginPath(); ctx.rect(0, 0, W, H); ctx.moveTo(det.x + lr, det.y); ctx.arc(det.x, det.y, lr, 0, Math.PI * 2, true); ctx.closePath(); ctx.fill('evenodd'); ctx.restore(); }
   for (const b of blobs) if (b.glow && b.state !== 'gone') { ctx.save(); ctx.strokeStyle = '#ffd23f'; ctx.lineWidth = 7; ctx.globalAlpha = 0.6 + 0.4 * Math.sin(T * 8); ctx.beginPath(); ctx.arc(b.cx, b.cy, Math.min(b.r, 62) + 10, 0, 7); ctx.stroke(); ctx.restore(); }
   ctx.save(); ctx.globalAlpha = 1 - det.open; ctx.lineCap = 'round';
   ctx.strokeStyle = INK; ctx.lineWidth = 16; ctx.beginPath(); ctx.moveTo(det.x + lr * 0.72, det.y + lr * 0.72); ctx.lineTo(det.x + lr * 0.72 + 44, det.y + lr * 0.72 + 44); ctx.stroke();

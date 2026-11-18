@@ -34,7 +34,7 @@ const ACH = [
   { id: 'racer3', ic: '🏎️', fr: ['Champion de course', 'Gagne 3 courses'], en: ['Race champion', 'Win 3 races'], ok: (s) => s.st.race >= 3 },
   { id: 'artist', ic: '🎨', fr: ['Artiste', 'Fais un dessin'], en: ['Artist', 'Make a drawing'], ok: (s) => s.st.art >= 1 },
   { id: 'reader', ic: '📖', fr: ['Lecteur', 'Lis une histoire'], en: ['Reader', 'Read a story'], ok: (s) => s.st.stories >= 1 },
-  { id: 'reader3', ic: '📚', fr: ['Grand lecteur', 'Lis les 7 histoires'], en: ['Bookworm', 'Read all 7 stories'], ok: (s) => ['s_bibi', 's_pingo', 's_drako', 's_momo', 's_lulu', 's_zip', 's_tina'].every((k) => (s.st.mode[k] || 0) > 0) }
+  { id: 'reader3', ic: '📚', fr: ['Grand lecteur', 'Lis 5 histoires'], en: ['Bookworm', 'Read 5 stories'], ok: (s) => STORIES.filter((x) => (s.st.mode['s_' + x.id] || 0) > 0).length >= 5 },
 ];
 
 const Prog = (() => {
