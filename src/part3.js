@@ -36,14 +36,15 @@ const clouds = Array.from({ length: 5 }, (_, i) => ({ x: Math.random() * 600, y:
 const amb = Array.from({ length: 14 }, () => ({ x: Math.random(), y: Math.random(), r: 5 + Math.random() * 12, v: 10 + Math.random() * 18, p: Math.random() * 6 }));
 const daisies = Array.from({ length: 12 }, () => ({ x: Math.random(), l: Math.random() > 0.5 ? 0 : 1 }));
 
+const ZS = 0.8;
 function layout() {
-  zip.x = W / 2; zip.y = H - 118;
+  zip.x = W / 2; zip.y = H - 108;
   const pr = $('prompt');
   const pb = !pr.hidden ? pr.offsetTop + pr.offsetHeight : H * 0.28;
   $('puzzle').style.top = (pb + 34) + 'px';
   if (kindNow() === 'drive') { layoutDrive(pb); return; }
   const top = pb + 42;
-  const bottom = zip.y - 96;
+  const bottom = zip.y - 104;
   const n = blobs.length || 3, rows = Math.ceil(n / 2), cellH = Math.max(60, (bottom - top) / rows);
   const r = clamp(Math.min(SW * 0.19, cellH * 0.41), 34, 90);
   blobs.forEach((b, i) => {
@@ -343,7 +344,7 @@ function drawHat(id, R) {
 
 function drawZip() {
   const R = 44, cx = zip.x, cy = zip.y + Math.sin(T * 2) * 4 - Math.abs(Math.sin(zip.hop * Math.PI)) * 26 * (zip.hop > 0 ? 1 : 0);
-  ctx.save(); ctx.translate(cx, cy); ctx.scale(1 + zip.sq, 1 - zip.sq);
+  ctx.save(); ctx.translate(cx, cy); ctx.scale((1 + zip.sq) * ZS, (1 - zip.sq) * ZS);
   ctx.lineJoin = 'round'; ctx.lineCap = 'round';
   // flame
   const fl = 22 + Math.sin(T * 32) * 5 + Math.sin(T * 17) * 3;
@@ -528,7 +529,7 @@ function fire(b) {
   zip.aimTo = clamp(Math.atan2(ty - zip.y, tx - zip.x), -Math.PI + 0.25, -0.25);
   setTimeout(() => {
     if (id !== S.qid || !S.q) return;
-    const a = zip.aim, tipx = zip.x + Math.cos(a) * 112, tipy = zip.y + Math.sin(a) * 112;
+    const a = zip.aim, tipx = zip.x + Math.cos(a) * 112 * ZS, tipy = zip.y + Math.sin(a) * 112 * ZS;
     bubble = { x0: tipx, y0: tipy, x: tipx, y: tipy, p: 0, blob: b };
     zip.recoil = -16; zip.sq = 0.1; Snd.shoot();
   }, 130);
