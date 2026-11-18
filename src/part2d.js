@@ -1,6 +1,6 @@
 
 /* ---------------------------------------------------------------- 1st-grade skills, menu meta, path text */
-const APP_VERSION = '2026-11-18.13';
+const APP_VERSION = '2026-11-18.14';
 const G1 = ['sub', 'compare', 'clock', 'shapes', 'pattern', 'sight', 'syl', 'rhyme'];
 const MODES_G1 = G1;
 const MODES_ALL = MODES7.concat(G1, ['geo', 'hunt', 'planets']);
@@ -231,7 +231,7 @@ GEN.geo = function (lv) {
   }
   if (k === 'compass') {
     const dirs = [['N', 0], ['E', 90], ['S', 180], [fr ? 'O' : 'W', 270]], [lab, deg] = pick(dirs), t = fr ? 'Où montre la flèche ?' : 'Where does the arrow point?';
-    return { vis: compassSvg(deg), text: t, say: fr ? 'Où montre la flèche ? Nord, est, sud ou ouest ?' : 'Where does the arrow point? North, east, south or west?', ans: lab, opts: shuffle(dirs).map(([l]) => ({ val: l, label: l, say: { N: fr ? 'nord' : 'north', E: fr ? 'est' : 'east', S: fr ? 'sud' : 'south', O: 'ouest', W: 'west' }[l] })), hint: lab };
+    return { vis: compassSvg(deg), text: t, say: fr ? 'Où montre la flèche ? Nord, l’est, sud ou ouest ?' : 'Where does the arrow point? North, east, south or west?', ans: lab, opts: shuffle(dirs).map(([l]) => ({ val: l, label: l, say: { N: fr ? 'nord' : 'north', E: fr ? 'l’est' : 'east', S: fr ? 'sud' : 'south', O: 'ouest', W: 'west' }[l] })), hint: lab };
   }
   const q = pickFresh(CANADA, 'canada'), t = q[L];
   return { vis: `<div class="pic">${q.vis}</div>`, text: t, say: t, ans: q.ans, opts: shuffle([q.ans].concat(q.d.slice(0, 2))).map((x) => ({ val: x, label: x, say: x.length > 2 && !/\p{Extended_Pictographic}/u.test(x) ? x : '' })), hint: '' };

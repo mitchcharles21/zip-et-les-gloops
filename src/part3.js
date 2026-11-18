@@ -1136,7 +1136,7 @@ function storyFinish() {
   const after = () => {
     show('story'); storyView('end');
     $('se-title').textContent = L === 'fr' ? `Bravo !` : `Well done!`; $('se-emoji').textContent = s.e;
-    Snd.sticker(); burst(W / 2, H * 0.35, 24); setTimeout(() => Voice.say(L === 'fr' ? `Bravo ! Tu as lu toute l'histoire !` : `Well done! You read the whole story!`), 400);
+    Snd.sticker(); burst(W / 2, H * 0.35, 24); setTimeout(() => Voice.say(L === 'fr' ? `Bravo ! Tu as lu toute l'histoire !` : `Well done! You finished the whole story!`), 400);
     setTimeout(() => Prog.check(), 900);
   };
   if (S.pendingSticker) { S.pendingSticker = false; showSticker(after); } else after();
