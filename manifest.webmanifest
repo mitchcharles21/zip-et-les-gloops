@@ -1,0 +1,17 @@
+{
+  "name": "Zip et les Gloops",
+  "short_name": "Zip",
+  "description": "Jeu éducatif bilingue / Bilingual learning game",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#8fd7ff",
+  "theme_color": "#8fd7ff",
+  "lang": "fr",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
