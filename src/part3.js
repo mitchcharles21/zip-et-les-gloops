@@ -217,9 +217,13 @@ function setCarAt(b, t) {
   const p = pathPt(b, t), a = pathPt(b, Math.max(0, t - 0.015)), c = pathPt(b, Math.min(1, t + 0.015));
   car.x = p[0]; car.y = p[1]; car.rot = Math.atan2(c[0] - a[0], -(c[1] - a[1]));
 }
+function loopPt(b, u) {
+  const ex = b.bx, ey = b.by0 + drv.off + b.r * 1.2, my = ey - 160, hx = car.hx, m = 1 - u;
+  return [m * m * m * ex + 3 * m * m * u * ex + 3 * m * u * u * hx + u * u * u * hx, m * m * m * ey + 3 * m * m * u * (ey - 90) + 3 * m * u * u * (my + 110) + u * u * u * my];
+}
 function carStep() {
   const dt = clamp(T - (drv.lt || T), 0, 0.05); drv.lt = T;
-  const tgt = car.mode === 'go' ? 260 : car.mode === 'settle' ? 300 : drv.sliding ? 170 : 70;
+  const tgt = car.mode === 'go' ? 260 : car.mode === 'settle' || car.mode === 'clear' ? 300 : drv.sliding ? 170 : 70;
   drv.spd += (tgt - drv.spd) * Math.min(1, dt * 4); drv.pos += drv.spd * dt;
   if (drv.sliding) { const p = clamp((T - drv.sl0) / 0.85, 0, 1); drv.off = -H * 0.8 * (1 - ease.outCubic(p)); if (p >= 1) { drv.sliding = false; drv.off = 0; } }
   if (car.mode === 'wait') { car.x = car.hx; car.y = H + 220; car.rot = 0; }
@@ -232,14 +236,23 @@ function carStep() {
     if (Math.random() < 0.5) parts.push({ k: 'dot', x: car.x + rnd(-20, 20), y: car.y + 50, vx: rnd(-15, 15), vy: rnd(10, 40), g: 0, life: 0.5, max: 0.5, r: rnd(4, 9), c: 'rgba(255,255,255,.7)' });
     if (p >= 1) {
       const b = car.b; car.mode = 'park'; bubbleHit(b);
-      if (S.done) { car.mode = 'settle'; car.t0 = T; car.fx = car.x; car.fy = car.y; car.rot0 = car.rot; }
+      if (S.done) {
+        car.mode = 'settle'; car.t0 = T; car.b = b; const p0 = loopPt(b, 0);
+        car.dx = car.x - p0[0]; car.dy = car.y - p0[1]; car.offF = car.hy - b.by0 - b.r * 1.2 + 160;
+      }
       else { car.mode = 'back'; car.t0 = T; }
     }
   } else if (car.mode === 'settle') {
-    // the car keeps going: the junction and signs slide past while it rejoins the main road
-    const p = ease.inOut(clamp((T - car.t0) / 1.15, 0, 1)), cf = car.hy - car.fy;
-    drv.off = (cf + H * 0.55) * p; car.y = car.fy + cf * p; car.x = lerp(car.fx, car.hx, p); car.rot = car.rot0 * (1 - p);
-    if (p >= 1) car.mode = 'idle';
+    // the road loops on past the sign and rejoins the main road; the camera scrolls so the car ends up back at home
+    const b = car.b, u = ease.inOut(clamp((T - car.t0) / 1.2, 0, 1));
+    drv.off = car.offF * u;
+    const q = loopPt(b, u), a = loopPt(b, Math.max(0, u - 0.02)), c = loopPt(b, Math.min(1, u + 0.02));
+    car.x = q[0] + car.dx * (1 - u); car.y = q[1] + car.dy * (1 - u); car.rot = Math.atan2(c[0] - a[0], -(c[1] - a[1]));
+    if (u >= 1) { car.mode = 'clear'; car.t0 = T; car.offC = drv.off; }
+  } else if (car.mode === 'clear') {
+    const k = clamp((T - car.t0) / 0.6, 0, 1);
+    car.x = car.hx; car.y = car.hy; car.rot = 0;
+    if (drv.sliding || k >= 1) car.mode = 'idle'; else drv.off = car.offC + H * 0.5 * ease.inOut(k);
   } else if (car.mode === 'back') {
     const p = clamp((T - car.t0) / 0.6, 0, 1); setCarAt(car.b, 0.96 * (1 - ease.inOut(p)));
     if (p >= 1) car.mode = 'idle';
@@ -249,7 +262,7 @@ function carStep() {
 function drawRoads() {
   const jy = car.jy + drv.off;
   const main = () => { ctx.beginPath(); ctx.moveTo(car.hx, H + 20); ctx.lineTo(car.hx, -20); };
-  const forks = () => { ctx.beginPath(); for (const b of blobs) { const [ex, ey] = roadEnd(b); ctx.moveTo(car.hx, jy); ctx.bezierCurveTo(car.hx, jy - 70, ex, ey + 110, ex, ey); } };
+  const forks = () => { ctx.beginPath(); for (const b of blobs) { const [ex, ey] = roadEnd(b), my = ey - 160; ctx.moveTo(car.hx, jy); ctx.bezierCurveTo(car.hx, jy - 70, ex, ey + 110, ex, ey); ctx.moveTo(ex, ey); ctx.bezierCurveTo(ex, ey - 90, car.hx, my + 110, car.hx, my); } };
   ctx.save(); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
   for (const [w, col] of [[66, INK], [54, '#6f6788']]) { ctx.strokeStyle = col; ctx.lineWidth = w; main(); ctx.stroke(); forks(); ctx.stroke(); }
   ctx.strokeStyle = '#fff'; ctx.lineWidth = 4; ctx.setLineDash([14, 16]); ctx.lineDashOffset = drv.pos;
@@ -467,7 +480,7 @@ const drv = { pos: 0, spd: 70, off: 0, lt: 0, sl0: 0, sliding: false };
 function kindNow() { return S.screen === 'play' && S.mode && MODEDEF[S.mode] ? MODEDEF[S.mode].kind : 'shoot'; }
 const S = { adv: null, advView: 'intro', advIdx: 0, stNext: null, friendHop: -9, screen: 'splash', mode: null, q: null, tries: 0, canTap: false, done: false, idle: 0, nudged: false, round: null, pendingSticker: false, greeted: false, shotTimer: 0, qid: 0 };
 const MODES = ['count', 'numbers', 'add', 'letters', 'first', 'drive', 'place', 'colors'];
-const screens = { splash: $('splash'), menu: $('menu'), roundend: $('roundend'), sticker: $('stickerscr'), album: $('albumscr'), adv: $('advscr'), trophy: $('trophyscr'), shop: $('shopscr'), cat: $('catscr'), settings: $('settingsscr'), path: $('pathscr'), paint: $('paintscr'), story: $('storyscr') };
+const screens = { splash: $('splash'), menu: $('menu'), roundend: $('roundend'), sticker: $('stickerscr'), album: $('albumscr'), adv: $('advscr'), trophy: $('trophyscr'), shop: $('shopscr'), cat: $('catscr'), settings: $('settingsscr'), profedit: $('profedit'), path: $('pathscr'), paint: $('paintscr'), story: $('storyscr') };
 
 function applyLang() {
   document.documentElement.lang = L;
@@ -476,6 +489,7 @@ function applyLang() {
   document.querySelectorAll('[data-i18n-aria]').forEach((el) => { el.setAttribute('aria-label', UI[L][el.dataset.i18nAria]); });
   $('l-fr').setAttribute('aria-pressed', String(L === 'fr')); $('l-en').setAttribute('aria-pressed', String(L === 'en'));
   document.title = L === 'fr' ? 'L’Académie de Zip' : 'Zip’s Academy';
+  if (typeof renderWho === 'function' && $('ptiles')) renderWho();
   $('starn').textContent = balance();
   renderPips(); if (S.screen === 'album') renderAlbum(); if (S.screen === 'adv') renderAdv(S.advView); if (S.screen === 'trophy') Prog.render(); if (S.screen === 'shop') renderShop(); if (S.screen === 'story') storyList(); if (S.screen === 'path') renderPath(S.pathView, false); if (S.screen === 'cat') openCat(S.cat); if (S.screen === 'settings') renderSettings(); Prog.updateBtn();
 }
@@ -490,7 +504,7 @@ function show(name) {
   S.screen = name;
   for (const k in screens) screens[k].hidden = k !== name;
   const play = name === 'play';
-  $('prompt').hidden = !play; $('home').hidden = !play; $('gear').hidden = name !== 'menu'; $('stars').hidden = name === 'splash';
+  $('prompt').hidden = !play; $('home').hidden = name === 'splash' || name === 'menu' || name === 'paint' || name === 'profedit'; $('gear').hidden = name !== 'menu'; $('stars').hidden = name === 'splash';
   if (!play) { race.active = false; blobs = []; bubble = null; S.q = null; S.canTap = false; $('puzzle').hidden = true; P.active = false; }
   if (!play) car.on = false;
   if (name !== 'story') STORY.tk++;
@@ -563,7 +577,7 @@ function bubbleHit(b) {
 }
 function missCommon() {
   S.tries++; Snd.bad(); Prog.miss(); zip.mood = 'oops'; zip.moodT = 1.1;
-  let line = pick(TX[L].again);
+  let line = nameLine(pick(TX[L].again));
   if (S.tries >= 2) { line += ' ' + S.q.hint; S.hint = true; }
   Voice.say(line);
 }
@@ -587,7 +601,7 @@ function win(x, y, extra) {
   burst(x, y, 14);
   floatText(x, y - 70, '+' + gain + ' ⭐');
   setTimeout(() => Snd.star(), 450);
-  const line = nameLine(pick(TX[L].praise));
+  const line = nameLine(pick(TX[L].praise), true);
   setTimeout(() => { Voice.say((extra ? extra + ' ' : '') + line); }, 400);
   addStars(gain); S.round.stars += gain; S.round.n++; if (first) S.round.first++;
   Prog.answer(first);
@@ -843,7 +857,7 @@ function racePass(gt) {
     Snd.good(); Snd.vroom(); burst(x, y, 14); floatText(x, y - 36, '+1 ⭐ 🚀'); addStars(1); Prog.answer(true);
     if (Prog.streak >= 3) setTimeout(() => floatText(x, y - 100, '🔥 ' + Prog.streak), 400);
     setTimeout(() => Snd.star(), 300); setTimeout(() => Prog.check(), 900);
-    Voice.say(nameLine(pick(TX[L].praise)));
+    Voice.say(nameLine(pick(TX[L].praise), true));
   } else {
     race.boost = -0.6; Snd.bad(); Prog.miss(); parts.push({ k: 'ring', x, y, vx: 0, vy: 0, g: 0, life: 0.4, max: 0.4, r: 20, c: '#ffd6e0' }); floatText(x, y - 36, '🐌');
     const right = gt.opts.find((z) => z.val === gt.q.ans); Voice.say(RX[L].was(right ? right.say : ''));
@@ -1122,7 +1136,7 @@ function storyAnswer(b) {
     document.querySelectorAll('#sq-opts .sq').forEach((x) => { x.disabled = true; if (x !== b) x.classList.add('dim'); }); b.classList.add('yes');
     Snd.good(); const r = b.getBoundingClientRect(); burst(r.left + r.width / 2, r.top, 16); floatText(r.left + r.width / 2, r.top - 20, '+' + (first ? 2 : 1) + ' ⭐');
     addStars(first ? 2 : 1); Prog.answer(first); persist(); setTimeout(() => Prog.check(), 900);
-    Voice.say(nameLine(pick(TX[L].praise)));
+    Voice.say(nameLine(pick(TX[L].praise), true));
     const tk = STORY.idx + ':' + STORY.qi; STORY.cur = tk;
     setTimeout(() => { if (S.screen !== 'story' || STORY.cur !== tk) return; if (STORY.qi + 1 < s.q.length) storyQuiz(STORY.qi + 1); else storyFinish(); }, 2000);
   } else {
@@ -1136,7 +1150,7 @@ function storyFinish() {
   const after = () => {
     show('story'); storyView('end');
     $('se-title').textContent = L === 'fr' ? `Bravo !` : `Well done!`; $('se-emoji').textContent = s.e;
-    Snd.sticker(); burst(W / 2, H * 0.35, 24); setTimeout(() => Voice.say(L === 'fr' ? `Bravo ! Tu as lu toute l'histoire !` : `Well done! You finished the whole story!`), 400);
+    Snd.sticker(); burst(W / 2, H * 0.35, 24); setTimeout(() => Voice.say(nameLine(L === 'fr' ? 'Bravo !' : 'Well done!', true) + (L === 'fr' ? ' Tu as lu toute l\'histoire !' : ' You finished the whole story!')), 400);
     setTimeout(() => Prog.check(), 900);
   };
   if (S.pendingSticker) { S.pendingSticker = false; showSticker(after); } else after();
@@ -1238,32 +1252,81 @@ $('path-go').addEventListener('click', () => { Snd.click(); gate(() => { if (S.p
 $('path-back').addEventListener('click', () => { Snd.click(); goMenu(); });
 
 /* ---------------------------------------------------------------- settings */
+const AV_COLS = ['#ffc93c', '#46d9a6', '#6fb7ff', '#ff7a8a', '#a98bff', '#ff9f43'];
+let whoEdit = false;
 function profLabel(p, i) { return p.name || UI[L].pl_player + ' ' + (i + 1); }
-function renderProfs(el) {
-  el.innerHTML = '';
+function tileBtn(cls, avTxt, label, bg) {
+  const b = document.createElement('button'); b.type = 'button'; b.className = cls;
+  const av = document.createElement('span'); av.className = 'av'; av.textContent = avTxt; if (bg) av.style.background = bg;
+  const nm = document.createElement('span'); nm.className = 'nm'; nm.textContent = label;
+  b.appendChild(av); b.appendChild(nm); return b;
+}
+function renderWho() {
+  const box = $('ptiles'); box.innerHTML = '';
   prof.list.forEach((p, i) => {
-    const b = document.createElement('button'); b.type = 'button'; b.className = 'pchip'; b.textContent = profLabel(p, i); b.setAttribute('aria-pressed', String(p.id === prof.act));
-    b.addEventListener('click', () => { Snd.unlock(); Snd.click(); if (p.id !== prof.act) switchProfile(p.id); });
-    el.appendChild(b);
+    const b = tileBtn('wt', p.av, profLabel(p, i), AV_COLS[p.c % AV_COLS.length]); b.dataset.id = p.id;
+    if (whoEdit) { const pen = document.createElement('i'); pen.className = 'pen'; pen.textContent = '✏️'; b.firstChild.appendChild(pen); }
+    b.addEventListener('click', () => { Snd.unlock(); Snd.click(); if (whoEdit) openProfEdit(p.id); else pickProfile(p.id); });
+    box.appendChild(b);
+  });
+  if (prof.list.length < 6) { const b = tileBtn('wt add', '＋', UI[L].add_short); b.addEventListener('click', () => { Snd.unlock(); Snd.click(); openProfEdit(null); }); box.appendChild(b); }
+  $('who-edit').textContent = whoEdit ? UI[L].who_done : UI[L].who_edit;
+}
+function enterGame() {
+  show('menu'); renderPips();
+  if (!S.greeted) { S.greeted = true; let h = TX[L].hello; if (save.name) h = h.replace(/^(Salut|Hi)\s*!/, UI[L].hi_name(save.name)); Voice.say(h); if (!Voice.ok) setTimeout(() => Voice.warn(), 800); }
+}
+function pickProfile(id) {
+  if (id === prof.act) { enterGame(); return; }
+  persist(); noPersist = true; prof.act = id; saveIdx();
+  try { sessionStorage.setItem('zip-enter', '1'); } catch (e) { /* ignore */ }
+  location.reload();
+}
+const PE = { id: null, av: AVS[0], first: false };
+function renderAvs() {
+  const box = $('pe-avs'); box.innerHTML = '';
+  AVS.forEach((a) => {
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'avb'; b.textContent = a; b.setAttribute('aria-pressed', String(a === PE.av));
+    b.addEventListener('click', () => { Snd.click(); PE.av = a; renderAvs(); }); box.appendChild(b);
   });
 }
-function renderWho() { renderProfs($('who-profs')); $('who-name').hidden = !!meProf().name; $('who-name').value = ''; $('who-add').hidden = prof.list.length >= 6; }
-function switchProfile(id) { persist(); noPersist = true; prof.act = id; saveIdx(); location.reload(); }
-function addProfile() {
-  if (prof.list.length >= 6) return;
-  persist(); noPersist = true;
-  const id = 'p' + Date.now().toString(36); prof.list.push({ id, name: '' }); prof.act = id; saveIdx();
-  location.reload();
+function openProfEdit(id, first) {
+  PE.id = id; PE.first = !!first;
+  const p = id ? prof.list.find((x) => x.id === id) : null;
+  PE.av = p ? p.av : AVS[prof.list.length % AVS.length];
+  show('profedit');
+  $('pe-title').textContent = UI[L][first ? 'pe_first' : p ? 'pe_edit' : 'pe_new'];
+  $('pe-name').value = p ? p.name : '';
+  if ($('pe-del').dataset.arm === '1') disarm($('pe-del'));
+  $('pe-del').hidden = !p || prof.list.length < 2;
+  $('pe-back').hidden = !!first;
+  renderAvs();
+}
+function saveProfEdit() {
+  const name = $('pe-name').value.replace(/[<>&"]/g, '').trim().slice(0, 12);
+  if (!PE.id) {
+    persist(); noPersist = true;
+    const id = 'p' + Date.now().toString(36); prof.list.push({ id, name, av: PE.av, c: prof.list.length }); prof.act = id; saveIdx();
+    try { sessionStorage.setItem('zip-enter', '1'); } catch (e) { /* ignore */ }
+    location.reload(); return;
+  }
+  const p = prof.list.find((x) => x.id === PE.id); p.name = name; p.av = PE.av; saveIdx();
+  if (p.id === prof.act) { save.name = name; persist(); }
+  whoEdit = false; show('splash'); renderWho();
+  if (PE.first) enterGame();
+}
+function deleteProf() {
+  const id = PE.id; if (!id || prof.list.length < 2) return;
+  const wasActive = id === prof.act;
+  if (wasActive) noPersist = true;
+  try { localStorage.removeItem(keyOf(id)); } catch (e) { /* ignore */ }
+  prof.list.splice(prof.list.findIndex((x) => x.id === id), 1);
+  if (wasActive) { prof.act = prof.list[0].id; saveIdx(); location.reload(); return; }
+  saveIdx(); whoEdit = false; show('splash'); renderWho();
 }
 function resetProgress() {
   noPersist = true;
   try { localStorage.setItem(SAVE_KEY, JSON.stringify({ lang: save.lang, name: save.name, music: save.music, voice: save.voice })); } catch (e) { /* ignore */ }
-  location.reload();
-}
-function deleteProfile() {
-  noPersist = true;
-  try { localStorage.removeItem(SAVE_KEY); } catch (e) { /* ignore */ }
-  prof.list.splice(prof.list.findIndex((p) => p.id === prof.act), 1); prof.act = prof.list[0].id; saveIdx();
   location.reload();
 }
 function disarm(btn) { btn.dataset.arm = ''; btn.classList.remove('armed'); const lab = btn.querySelector('span:nth-child(2)'); lab.setAttribute('data-i18n', btn.dataset.key); lab.textContent = UI[L][btn.dataset.key]; }
@@ -1277,8 +1340,7 @@ function armed(btn, action) {
   });
 }
 function renderSettings() {
-  if (document.activeElement !== $('st-name')) $('st-name').value = save.name;
-  renderProfs($('st-profs')); $('st-del').hidden = prof.list.length < 2; $('st-add').hidden = prof.list.length >= 6;
+  { const m = meProf(); $('st-av').textContent = m.av; $('st-pname').textContent = profLabel(m, prof.list.indexOf(m)); }
   $('st-warn').textContent = storageOK ? '' : UI[L].nostore;
   $('st-music').setAttribute('aria-pressed', String(Snd.on)); $('st-voice').setAttribute('aria-pressed', String(Snd.voiceOn));
   $('st-ver').textContent = UI[L].ver + ' ' + APP_VERSION;
@@ -1304,14 +1366,12 @@ $('st-music').addEventListener('click', () => { Snd.unlock(); Snd.setMusic(!Snd.
 $('st-voice').addEventListener('click', () => { Snd.unlock(); const on = !Snd.voiceOn; Snd.setVoice(on); if (!on) Voice.stop(); Snd.click(); renderSettings(); sndSync(); if (on) Voice.say(L === 'fr' ? 'Salut !' : 'Hi!'); });
 $('st-update').addEventListener('click', () => { Snd.click(); checkUpdate(); });
 $('st-claude').addEventListener('click', () => { Snd.unlock(); Snd.click(); if (!Snd.voiceOn) { Snd.setVoice(true); renderSettings(); sndSync(); } Voice.say(UI[L].claude_say); });
-$('st-name').addEventListener('input', (e) => { setName(e.target.value.replace(/[<>&"]/g, '').trim().slice(0, 12)); renderProfs($('st-profs')); renderWho(); });
-$('st-name').addEventListener('blur', () => { setName(save.name); });
-$('st-name').addEventListener('keydown', (e) => { if (e.key === 'Enter') e.target.blur(); });
-$('st-name').addEventListener('change', () => { if (save.name) Voice.say(UI[L].hi_name(save.name)); });
-$('st-add').addEventListener('click', () => { Snd.unlock(); Snd.click(); addProfile(); });
-$('who-add').addEventListener('click', () => { Snd.unlock(); Snd.click(); addProfile(); });
-$('who-name').addEventListener('input', (e) => { setName(e.target.value.replace(/[<>&"]/g, '').trim().slice(0, 12)); renderProfs($('who-profs')); });
-armed($('st-reset'), resetProgress); armed($('st-del'), deleteProfile);
+armed($('st-reset'), resetProgress); armed($('pe-del'), deleteProf);
+$('st-switch').addEventListener('click', () => { Snd.unlock(); Snd.click(); whoEdit = false; show('splash'); renderWho(); });
+$('who-edit').addEventListener('click', () => { Snd.unlock(); Snd.click(); whoEdit = !whoEdit; renderWho(); });
+$('pe-save').addEventListener('click', () => { Snd.unlock(); Snd.click(); saveProfEdit(); });
+$('pe-back').addEventListener('click', () => { Snd.click(); show('splash'); renderWho(); });
+$('pe-name').addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); saveProfEdit(); } });
 $('st-back').addEventListener('click', () => { Snd.click(); goMenu(); });
 
 function tickFrame(now) {
@@ -1356,12 +1416,8 @@ cv.addEventListener('pointerdown', (e) => {
   }
   if (best) fire(best);
 });
-$('start').addEventListener('click', () => {
-  Snd.unlock(); Snd.click(); show('menu'); renderPips();
-  if (!S.greeted) { S.greeted = true; Voice.say(TX[L].hello); if (!Voice.ok) setTimeout(() => Voice.warn(), 800); }
-});
 document.querySelectorAll('.mode').forEach((m) => m.addEventListener('click', () => { Snd.unlock(); Snd.click(); startMode(m.dataset.mode); }));
-$('home').addEventListener('click', () => { Snd.click(); goMenu(); });
+$('home').addEventListener('click', () => { Snd.click(); if (S.screen !== 'play') S.fromCat = null; goMenu(); });
 $('speak').addEventListener('click', () => { Snd.unlock(); if (S.q) Voice.say(S.q.say); });
 const sndSync = () => {
   $('music').classList.toggle('off', !Snd.on && !Snd.voiceOn); $('music').setAttribute('aria-expanded', String(!$('soundpop').hidden));
@@ -1396,9 +1452,13 @@ window.addEventListener('orientationchange', () => setTimeout(resize, 200));
 
 sndSync();
 applyLang(); show('splash'); resize(); Prog.updateBtn(); renderWho();
-if (!meProf().name) setTimeout(() => { try { $('who-name').focus(); } catch (e) { /* ignore */ } }, 400);
+{
+  let entered = false;
+  try { if (sessionStorage.getItem('zip-enter')) { sessionStorage.removeItem('zip-enter'); enterGame(); entered = true; } } catch (e) { /* ignore */ }
+  if (!entered && !meProf().name && prof.list.length === 1) openProfEdit(meProf().id, true);
+}
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { /* canvas text uses Fredoka once loaded */ });
 requestAnimationFrame(frame);
-window.__GLOOPS = { S, save, blobs: () => blobs, fire, GEN, newQuestion, startMode, T: () => T, P, car, SHOP, openShop, Prog, openAdv, advNext, startStop, finishStop, race, startRace, openPath, ensurePath, startPathStep, pathStepDone, openCat, MODE_META, CAT_ORDER, STORY, PAINT, openStories, openPaint, STORIES };
+window.__GLOOPS = { enterGame, prof, openProfEdit, S, save, blobs: () => blobs, fire, GEN, newQuestion, startMode, T: () => T, P, car, SHOP, openShop, Prog, openAdv, advNext, startStop, finishStop, race, startRace, openPath, ensurePath, startPathStep, pathStepDone, openCat, MODE_META, CAT_ORDER, STORY, PAINT, openStories, openPaint, STORIES };
 })();
 </script>

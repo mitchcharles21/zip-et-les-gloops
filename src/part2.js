@@ -13,11 +13,12 @@ const lerp = (a, b, t) => a + (b - a) * t;
 let storageOK = true, noPersist = false;
 try { localStorage.setItem('zip-test', '1'); storageOK = localStorage.getItem('zip-test') === '1'; localStorage.removeItem('zip-test'); } catch (e) { storageOK = false; }
 const IDX_KEY = 'zip-gloops-profiles';
+const AVS = ['🦊', '🐼', '🐸', '🦄', '🐙', '🦁', '🐯', '🐶', '🐰', '🐵', '🦖', '🐱'];
 const prof = (() => {
   let idx = null;
   try { idx = JSON.parse(localStorage.getItem(IDX_KEY) || 'null'); } catch (e) { idx = null; }
-  const list = idx && Array.isArray(idx.list) ? idx.list.filter((p) => p && typeof p.id === 'string' && /^[a-z0-9]{1,16}$/i.test(p.id)).map((p) => ({ id: p.id, name: typeof p.name === 'string' ? p.name.slice(0, 12) : '' })) : [];
-  if (!list.length) list.push({ id: 'p1', name: '' });
+  const list = idx && Array.isArray(idx.list) ? idx.list.filter((p) => p && typeof p.id === 'string' && /^[a-z0-9]{1,16}$/i.test(p.id)).map((p, i) => ({ id: p.id, name: typeof p.name === 'string' ? p.name.slice(0, 12) : '', av: AVS.includes(p.av) ? p.av : AVS[i % AVS.length], c: Number.isInteger(p.c) ? p.c : i })) : [];
+  if (!list.length) list.push({ id: 'p1', name: '', av: AVS[0], c: 0 });
   const act = idx && list.some((p) => p.id === idx.act) ? idx.act : list[0].id;
   return { act, list };
 })();

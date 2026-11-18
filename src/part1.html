@@ -300,9 +300,20 @@ button.chip:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--ink);
 .pchip { min-height: 44px; padding: 6px 14px; border: 3px solid var(--ink); border-radius: 22px; background: #fff; font-size: 18px; font-weight: 700; box-shadow: 0 3px 0 var(--ink); }
 .pchip[aria-pressed="true"] { background: var(--mint); }
 #splash { justify-content: center; padding-bottom: clamp(90px, 22vh, 150px); box-sizing: border-box; } #splash > * { margin-top: 0; margin-bottom: 0; }
-#who { display: flex; flex-direction: column; align-items: center; gap: 8px; width: min(100%, 360px); } #who .setinp { max-width: 260px; } #who-add { font-size: 17px; padding: 6px 14px; min-height: 0; }
 .btn[hidden], .setinp[hidden] { display: none; } #who small { font-size: 18px; font-weight: 700; }
 .setrow[hidden] { display: none; } .setrow.armed { background: #ffd0d0; }
+.ptiles { display: flex; flex-wrap: wrap; gap: 14px 12px; justify-content: center; width: 100%; }
+#who { display: flex; flex-direction: column; align-items: center; gap: 10px; width: min(100%, 380px); } #who > b { font-size: 22px; } #who-edit { font-size: 17px; padding: 6px 16px; min-height: 0; }
+.wt { width: 94px; display: flex; flex-direction: column; align-items: center; gap: 8px; background: none; border: 0; padding: 0; font-weight: 700; font-size: 17px; }
+.wt .av { position: relative; width: 84px; height: 84px; border-radius: 26px; border: 4px solid var(--ink); box-shadow: 0 5px 0 var(--ink); display: flex; align-items: center; justify-content: center; font-size: 46px; line-height: 1; box-sizing: border-box; }
+.wt:active .av { transform: translateY(4px); box-shadow: 0 1px 0 var(--ink); }
+.wt.add .av { background: #fff; border-style: dashed; box-shadow: none; font-size: 40px; color: var(--ink); }
+.wt .nm { max-width: 94px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.wt .pen { position: absolute; right: -9px; bottom: -9px; width: 30px; height: 30px; border-radius: 50%; background: #fff; border: 3px solid var(--ink); font-size: 14px; font-style: normal; display: flex; align-items: center; justify-content: center; }
+.avs { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; width: 100%; }
+.avb { font-size: 26px; line-height: 1; min-height: 46px; border: 3px solid transparent; border-radius: 14px; background: #fff; padding: 0; }
+.avb[aria-pressed="true"] { border-color: var(--ink); background: var(--mint); }
+#profedit .panel { max-height: 100%; min-height: 0; overflow-y: auto; box-sizing: border-box; gap: 10px; }
 </style>
 
 <canvas id="cv" aria-label="Game scene"></canvas>
@@ -332,10 +343,19 @@ button.chip:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--ink);
 
 <section class="screen" id="splash">
   <h1 class="logo"><small class="lg1" data-i18n="logo1">L’Académie de</small><span data-i18n="logo_big">Zip</span><small data-i18n="logo2"></small></h1>
-  <button class="btn pulse" id="start" type="button" data-i18n="start">Jouer !</button>
-  <div id="who"><small data-i18n="who">Qui joue ?</small><div class="profs" id="who-profs"></div>
-    <input id="who-name" class="setinp" type="text" maxlength="12" autocomplete="off" autocapitalize="words" spellcheck="false" data-ph="name_ph" hidden>
-    <button class="btn alt small" id="who-add" type="button" data-i18n="add_player">➕ Nouveau joueur</button>
+  <div id="who"><b data-i18n="who">Qui joue ?</b><div class="ptiles" id="ptiles"></div>
+    <button class="btn alt small" id="who-edit" type="button"></button>
+  </div>
+</section>
+
+<section class="screen" id="profedit" hidden>
+  <div class="panel">
+    <h2 id="pe-title" style="margin:0"></h2>
+    <div class="avs" id="pe-avs"></div>
+    <input id="pe-name" class="setinp" type="text" maxlength="12" autocomplete="off" autocapitalize="words" spellcheck="false" data-ph="name_ph">
+    <button class="btn small" id="pe-save" type="button" data-i18n="pe_ok">OK</button>
+    <button type="button" class="setrow danger" id="pe-del" hidden><span class="si">🗑️</span><span data-i18n="pe_del">Supprimer ce joueur</span></button>
+    <button class="btn alt small" id="pe-back" type="button" data-i18n="back">Retour</button>
   </div>
 </section>
 
@@ -424,9 +444,7 @@ button.chip:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--ink);
   <div class="panel">
     <h2 data-i18n="settings" style="margin:0">Réglages</h2>
     <div class="setgrp"><b data-i18n="st_player">Joueur</b>
-      <div class="profs" id="st-profs"></div>
-      <input id="st-name" class="setinp" type="text" maxlength="12" autocomplete="off" autocapitalize="words" spellcheck="false" data-ph="name_ph">
-      <button class="btn alt small" id="st-add" type="button" data-i18n="add_player">➕ Nouveau joueur</button>
+      <button type="button" class="setrow" id="st-switch"><span class="si" id="st-av"></span><span id="st-pname"></span><span class="si">🔄</span></button>
     </div>
     <div class="setgrp"><b data-i18n="st_sound">Son</b>
       <button type="button" class="setrow" id="st-music" aria-pressed="true"><span class="si">🎵</span><span data-i18n="snd_music">Musique</span><i class="tg"></i></button>
@@ -439,7 +457,6 @@ button.chip:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--ink);
     </div>
     <div class="setgrp"><b data-i18n="st_data">Progression</b>
       <button type="button" class="setrow danger" id="st-reset"><span class="si">🧹</span><span data-i18n="reset">Effacer la progression</span></button>
-      <button type="button" class="setrow danger" id="st-del" hidden><span class="si">🗑️</span><span data-i18n="del_player">Supprimer ce joueur</span></button>
       <p id="st-warn" class="setnote"></p>
     </div>
     <button type="button" class="setrow" id="st-claude"><span class="si">💛</span><span data-i18n="made_with">Fait avec Claude</span><span class="si">🔊</span></button>
