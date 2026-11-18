@@ -283,21 +283,18 @@ button.chip:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--ink);
 #path-card { display: flex; flex-direction: column; align-items: center; gap: 2px; }
 #path-ico { font-size: 70px; line-height: 1.1; animation: hop 1.6s ease-in-out infinite; } #path-name { font-size: 28px; } #path-desc { font-size: 19px; opacity: .8; }
 #path-say { margin: 0; font-size: 18px; font-weight: 600; }
-#soundpop { position: absolute; right: 0; top: 56px; z-index: 30; pointer-events: auto; display: flex; flex-direction: column; gap: 8px; padding: 10px; background: var(--paper); border: 4px solid var(--ink); border-radius: 22px; box-shadow: 0 6px 0 var(--ink); min-width: 200px; }
+#soundpop { position: fixed; right: max(16px, calc(50% - 280px)); top: calc(max(10px, env(safe-area-inset-top, 0px)) + 54px); z-index: 60; pointer-events: auto; display: flex; flex-direction: column; gap: 8px; padding: 10px; background: var(--paper); border: 4px solid var(--ink); border-radius: 22px; box-shadow: 0 6px 0 var(--ink); min-width: 200px; }
 #soundpop button { display: flex; align-items: center; gap: 10px; background: #fff; border: 3px solid var(--ink); border-radius: 16px; padding: 8px 10px; font-size: 18px; font-weight: 700; min-height: 46px; }
 #soundpop .si { font-size: 22px; } #soundpop span:nth-child(2) { flex: 1; text-align: left; }
-#soundpop .tg { width: 46px; height: 26px; border-radius: 13px; border: 3px solid var(--ink); background: #d8d0e8; position: relative; flex: 0 0 auto; transition: background .15s; }
-#soundpop .tg::after { content: ''; position: absolute; top: 1px; left: 1px; width: 18px; height: 18px; border-radius: 50%; background: #fff; border: 3px solid var(--ink); box-sizing: content-box; transform: translateX(0); transition: transform .15s; margin: -1px 0 0 -1px; }
-#soundpop [aria-pressed="true"] .sw { background: var(--mint); } #soundpop [aria-pressed="true"] .sw::after { transform: translateX(20px); }
 .setgrp { display: flex; flex-direction: column; gap: 8px; align-items: stretch; width: 100%; } .setgrp > b { font-size: 20px; }
 .setrow { display: flex; align-items: center; gap: 10px; background: #fff; border: 3px solid var(--ink); border-radius: 16px; padding: 8px 10px; font-size: 18px; font-weight: 700; min-height: 46px; }
 .setrow .si { font-size: 22px; } .setrow span:nth-child(2) { flex: 1; text-align: left; }
-.setrow .tg, #soundpop .tg { width: 46px; height: 26px; border-radius: 13px; border: 3px solid var(--ink); background: #d8d0e8; position: relative; flex: 0 0 auto; transition: background .15s; box-sizing: border-box; }
-.setrow .tg::after { content: ''; position: absolute; top: 1px; left: 1px; width: 16px; height: 16px; border-radius: 50%; background: #fff; border: 3px solid var(--ink); transform: translateX(0); transition: transform .15s; }
-.setrow[aria-pressed="true"] .tg { background: var(--mint); } .setrow[aria-pressed="true"] .tg::after { transform: translateX(20px); }
 .setnote { margin: 0; font-size: 15px; opacity: .8; text-align: center; min-height: 1.2em; }
 .setinp { width: 100%; box-sizing: border-box; font: inherit; font-size: 20px; font-weight: 700; text-align: center; color: var(--ink); background: #fff; border: 3px solid var(--ink); border-radius: 16px; padding: 8px 10px; min-height: 46px; }
 #settingsscr { gap: 12px; } #settingsscr .panel { gap: 8px; max-height: 100%; overflow-y: auto; } #settingsscr .panel h2 { font-size: 28px; } #st-update { font-size: 18px; padding: 8px 12px; min-height: 0; }
+.tg { display: block; width: 46px; height: 26px; border-radius: 13px; border: 3px solid var(--ink); background: #d8d0e8; position: relative; flex: 0 0 auto; box-sizing: border-box; transition: background .15s; }
+.tg::after { content: ''; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; box-sizing: border-box; border-radius: 50%; background: #fff; border: 2px solid var(--ink); transition: transform .15s; }
+[aria-pressed="true"] > .tg { background: var(--mint); } [aria-pressed="true"] > .tg::after { transform: translateX(20px); }
 </style>
 
 <canvas id="cv" aria-label="Game scene"></canvas>
@@ -308,10 +305,6 @@ button.chip:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--ink);
     <div class="right">
       <div class="lang" role="group" aria-label="Language / Langue"><button type="button" id="l-fr" data-l="fr" aria-pressed="true">FR</button><button type="button" id="l-en" data-l="en" aria-pressed="false">EN</button></div>
       <button class="chip" id="music" type="button" data-i18n-aria="music" aria-label="Music"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18V6l11-2v12" fill="none" stroke="#3a2358" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/><circle cx="6.5" cy="18" r="3" fill="#8b5cf6" stroke="#3a2358" stroke-width="2.4"/><circle cx="17.5" cy="16" r="3" fill="#8b5cf6" stroke="#3a2358" stroke-width="2.4"/></svg></button>
-      <div id="soundpop" hidden>
-        <button type="button" id="sp-music" aria-pressed="true"><span class="si">🎵</span><span data-i18n="snd_music">Musique</span><i class="tg"></i></button>
-        <button type="button" id="sp-voice" aria-pressed="true"><span class="si">🗣️</span><span data-i18n="snd_voice">Voix</span><i class="tg"></i></button>
-      </div>
     </div>
   </div>
   <div id="prompt" hidden>
@@ -322,6 +315,10 @@ button.chip:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--ink);
 </div>
 
 <div id="puzzle" hidden><div id="slots"></div><div id="tray"></div></div>
+<div id="soundpop" hidden>
+        <button type="button" id="sp-music" aria-pressed="true"><span class="si">🎵</span><span data-i18n="snd_music">Musique</span><i class="tg"></i></button>
+        <button type="button" id="sp-voice" aria-pressed="true"><span class="si">🗣️</span><span data-i18n="snd_voice">Voix</span><i class="tg"></i></button>
+      </div>
 <div id="toast" hidden><span class="ti"></span><div><b class="tt"></b><small class="ts"></small></div></div>
 
 <section class="screen" id="splash">
