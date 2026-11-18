@@ -1,6 +1,6 @@
 
 /* ---------------------------------------------------------------- 1st-grade skills, menu meta, path text */
-const APP_VERSION = '2026-11-18.20';
+const APP_VERSION = '2026-11-18.21';
 const G1 = ['sub', 'compare', 'clock', 'shapes', 'pattern', 'sight', 'syl', 'rhyme'];
 const MODES_G1 = G1;
 const MODES_ALL = MODES7.concat(G1, ['geo', 'hunt', 'planets']);
@@ -24,7 +24,7 @@ const MODE_META = {
   colors: { ico: '🎨', cls: 'm8', cat: 'disc', d: { fr: 'Apprends les couleurs', en: 'Learn the colors' } },
   planets: { ico: '🪐', bg: '#cbb8ff', cat: 'disc', d: { fr: 'Voyage dans l’espace', en: 'Travel through space' } },
   geo: { ico: '🌍', bg: '#8fd7a8', cat: 'disc', d: { fr: 'Découvre le monde', en: 'Discover the world' } },
-  hunt: { ico: '🔍', bg: '#b9d8ff', cat: 'disc', d: { fr: 'Trouve les formes autour de toi', en: 'Find shapes around you' } },
+  hunt: { ico: '🔍', bg: '#b9d8ff', cat: 'disc', d: { fr: 'Trouve les formes avec ta loupe', en: 'Find shapes with your magnifier' } },
   story: { ico: '📖', bg: '#ffd9a0', cat: 'fun', d: { fr: 'Lis une histoire', en: 'Read a story' } }
 };
 const CAT_ORDER = { math: ['count', 'numbers', 'add', 'sub', 'compare', 'pattern', 'clock', 'shapes'], read: ['letters', 'first', 'place', 'sight', 'syl', 'rhyme'], fun: ['drive', 'race'], disc: ['colors', 'geo', 'hunt', 'planets'] };
@@ -216,11 +216,12 @@ const HUNT = {
   star: { fr: 'une étoile', en: 'a star', e: ['⭐', '🌟'] },
   heart: { fr: 'un cœur', en: 'a heart', e: ['❤️', '💖'] }
 };
+let huntN = 0;
 GEN.hunt = function (lv) {
   const pool = lv === 1 ? ['circle', 'triangle', 'square'] : ['circle', 'triangle', 'square', 'rectangle', 'star', 'heart'];
   const id = pick(pool), ans = pick(HUNT[id].e), others = shuffle(pool.filter((x) => x !== id)).slice(0, lv === 1 ? 2 : 3).map((x) => pick(HUNT[x].e));
-  const t = fr_() ? `Touche ce qui ressemble à ${HUNT[id].fr} !` : `Tap what looks like ${HUNT[id].en}!`;
-  return { vis: shapeSvg(id, pick(['#ff7a8a', '#ffc93c', '#46d9a6', '#6fb7ff', '#a98bff'])), text: t, say: t, ans, opts: shuffle([ans].concat(others)).map((e) => ({ val: e, label: e, say: '' })), hint: '' };
+  const t = fr_() ? `Cherche ce qui ressemble à ${HUNT[id].fr} !` : `Look for what looks like ${HUNT[id].en}!`, more = huntN++ < 3 ? (fr_() ? ' Bouge la loupe pour chercher.' : ' Move the magnifying glass to search.') : '';
+  return { vis: shapeSvg(id, pick(['#ff7a8a', '#ffc93c', '#46d9a6', '#6fb7ff', '#a98bff'])), text: t, say: t + more, ans, opts: shuffle([ans].concat(others)).map((e) => ({ val: e, label: e, say: '' })), hint: '' };
 };
 
 /* ---------------------------------------------------------------- artwork (SVG pictures) */
@@ -321,7 +322,7 @@ const PL_FACTS = [
   ['Quelle planète est la plus proche du Soleil ?', 'Which planet is closest to the Sun?', 'mercury'], ['Quelle planète est la plus chaude ?', 'Which planet is the hottest?', 'venus'],
   ['Quelle planète est bleue et très loin ?', 'Which planet is blue and very far away?', 'neptune']
 ];
-const SKY = [['sun', 'le Soleil', 'the Sun'], ['moon', 'la Lune', 'the Moon'], ['earth', 'la Terre', 'the Earth'], ['star', 'une étoile', 'a star'], ['saturn', 'Saturne', 'Saturn']];
+const SKY = [['sun', 'le Soleil', 'the Sun'], ['moon', 'la Lune', 'the Moon'], ['earth', 'la Terre', 'the Earth'], ['saturn', 'Saturne', 'Saturn']];
 const FR_ORD = ['première', 'deuxième', 'troisième', 'quatrième', 'cinquième', 'sixième', 'septième', 'huitième'];
 const EN_ORD = ['first', 'second', 'third', 'fourth', 'fifth', 'sixth', 'seventh', 'eighth'];
 function solarSvg(hi) {

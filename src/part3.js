@@ -62,6 +62,52 @@ function starPath(c, x, y, R, r) {
 }
 function hillY(x, base, amp, ph) { return base + Math.sin(x * 0.008 + ph) * amp + Math.sin(x * 0.019 + ph * 2) * amp * 0.4; }
 
+
+/* ---------------------------------------------------------------- detective (shape hunt) */
+const EMO = '"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif';
+function drawDetect(dt) {
+  const lr = det.r = clamp(SW * 0.17, 56, 84);
+  if (!det.init) { det.x = det.tx = W / 2; det.y = det.ty = H * 0.5; det.init = true; }
+  if (!det.touched && !S.done && S.canTap) { det.tx = W / 2 + Math.sin(T * 0.9) * SW * 0.3; det.ty = H * 0.52 + Math.cos(T * 0.7) * H * 0.1; }
+  const k = Math.min(1, dt * (det.down ? 22 : 9)); det.x += (det.tx - det.x) * k; det.y += (det.ty - det.y) * k;
+  det.open += ((S.done ? 1 : 0) - det.open) * Math.min(1, dt * 5);
+  for (const b of blobs) {
+    if (b.state === 'gone') continue;
+    const age = T - b.t0; let x = b.bx + b.jx, y = b.by + b.jy + Math.sin(T * 1.4 + b.ph) * 3, al = 1, sc = 1;
+    if (b.state === 'in') { const p = clamp((age - b.delay) / 0.5, 0, 1); if (age < b.delay) continue; al = p; sc = 0.7 + 0.3 * p; if (p >= 1) { b.state = 'idle'; b.t0 = T; } }
+    else if (b.state === 'shake') { const p = age / 0.6; x += Math.sin(age * 46) * 9 * Math.max(0, 1 - p); if (p >= 1) { b.state = 'idle'; b.t0 = T; } }
+    else if (b.state === 'win') { sc = 1 + 0.35 * Math.min(1, age * 4) + 0.05 * Math.sin(age * 9); }
+    else if (b.state === 'out') { al = Math.max(0, 1 - age / 0.4); if (age > 0.4) { b.state = 'gone'; continue; } }
+    if (b.dim) al *= 0.35;
+    b.cx = x; b.cy = y;
+    const r = Math.min(b.r, 62) * sc;
+    ctx.save(); ctx.globalAlpha = al; ctx.fillStyle = '#fffaf0'; ctx.strokeStyle = INK; ctx.lineWidth = 4;
+    ctx.beginPath(); ctx.arc(x, y, r, 0, 7); ctx.fill(); ctx.stroke();
+    ctx.font = `${Math.round(r * 1.2)}px ${EMO}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = INK; ctx.fillText(b.label, x, y + r * 0.06);
+    ctx.restore();
+  }
+  const dark = 0.9 * (1 - det.open);
+  if (dark > 0.01) { ctx.save(); ctx.fillStyle = `rgba(34,20,66,${dark})`; ctx.beginPath(); ctx.rect(0, 0, W, H); ctx.arc(det.x, det.y, lr, 0, 7, true); ctx.fill('evenodd'); ctx.restore(); }
+  for (const b of blobs) if (b.glow && b.state !== 'gone') { ctx.save(); ctx.strokeStyle = '#ffd23f'; ctx.lineWidth = 7; ctx.globalAlpha = 0.6 + 0.4 * Math.sin(T * 8); ctx.beginPath(); ctx.arc(b.cx, b.cy, Math.min(b.r, 62) + 10, 0, 7); ctx.stroke(); ctx.restore(); }
+  ctx.save(); ctx.globalAlpha = 1 - det.open; ctx.lineCap = 'round';
+  ctx.strokeStyle = INK; ctx.lineWidth = 16; ctx.beginPath(); ctx.moveTo(det.x + lr * 0.72, det.y + lr * 0.72); ctx.lineTo(det.x + lr * 0.72 + 44, det.y + lr * 0.72 + 44); ctx.stroke();
+  ctx.strokeStyle = '#a8703c'; ctx.lineWidth = 8; ctx.stroke();
+  ctx.strokeStyle = INK; ctx.lineWidth = 12; ctx.beginPath(); ctx.arc(det.x, det.y, lr + 2, 0, 7); ctx.stroke();
+  ctx.strokeStyle = '#ffd23f'; ctx.lineWidth = 6; ctx.beginPath(); ctx.arc(det.x, det.y, lr + 2, 0, 7); ctx.stroke();
+  ctx.fillStyle = 'rgba(255,255,255,.18)'; ctx.beginPath(); ctx.arc(det.x, det.y, lr, 0, 7); ctx.fill();
+  ctx.restore();
+  ctx.font = `64px ${EMO}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('🕵️', zip.x, zip.y + 6 + Math.sin(T * 2) * 3);
+}
+function detAnswer(b) {
+  if (!S.canTap || S.done) return;
+  S.canTap = false; S.idle = 0; Snd.click(); det.tx = b.cx; det.ty = b.cy;
+  const id = S.qid; setTimeout(() => { if (id === S.qid && S.q) bubbleHit(b); }, 280);
+}
+function detRelease(e) {
+  const near = (x, y, rad) => { let best = null, bd = 1e9; for (const b of blobs) { if (b.state === 'in' || b.state === 'gone' || b.state === 'out' || b.cx == null) continue; const d = Math.hypot(x - b.cx, y - b.cy); if (d < rad(b) && d < bd) { best = b; bd = d; } } return best; };
+  const b = det.moved < 12 ? near(e.clientX, e.clientY, (q) => q.r * 1.1) : near(det.x, det.y, () => det.r * 0.85);
+  if (b) detAnswer(b);
+}
 function drawBackground(dt) {
   if (kindNow() === 'race') return;
   if (kindNow() === 'drive') { drawField(dt); return; }
@@ -228,7 +274,7 @@ function loopPt(b, u) {
 }
 function carStep() {
   const dt = clamp(T - (drv.lt || T), 0, 0.05); drv.lt = T;
-  const tgt = car.mode === 'go' ? 260 : car.mode === 'settle' || car.mode === 'clear' ? 300 : drv.sliding ? 170 : 70;
+  const tgt = car.mode === 'go' ? 260 : car.mode === 'steer' ? 150 : car.mode === 'settle' || car.mode === 'clear' ? 300 : drv.sliding ? 170 : 70;
   drv.spd += (tgt - drv.spd) * Math.min(1, dt * 4); drv.pos += drv.spd * dt;
   if (drv.sliding) { const p = clamp((T - drv.sl0) / 0.85, 0, 1); drv.off = -H * 0.8 * (1 - ease.outCubic(p)); if (p >= 1) { drv.sliding = false; drv.off = 0; } }
   if (car.mode === 'wait') { car.x = car.hx; car.y = H + 220; car.rot = 0; }
@@ -236,6 +282,10 @@ function carStep() {
     const p = clamp((T - car.t0) / 0.75, 0, 1); car.x = car.hx; car.y = lerp(H + 160, car.hy, ease.outBack(p)); car.rot = 0;
     if (p >= 1) car.mode = 'idle';
   } else if (car.mode === 'idle') { car.x = car.hx; car.y = car.hy; car.rot = 0; }
+  else if (car.mode === 'steer') {
+    const st = car.st; st.t += (st.tt - st.t) * Math.min(1, dt * 16); setCarAt(st.b, st.t);
+    if (st.tt >= 0.88 && st.t > 0.84) steerEnd(true);
+  }
   else if (car.mode === 'go') {
     const p = clamp((T - car.t0) / car.dur, 0, 1); setCarAt(car.b, 0.96 * ease.inOut(p));
     if (Math.random() < 0.5) parts.push({ k: 'dot', x: car.x + rnd(-20, 20), y: car.y + 50, vx: rnd(-15, 15), vy: rnd(10, 40), g: 0, life: 0.5, max: 0.5, r: rnd(4, 9), c: 'rgba(255,255,255,.7)' });
@@ -264,6 +314,28 @@ function carStep() {
   }
   for (const b of blobs) if (b.by0 != null) b.by = b.by0 + drv.off;
 }
+
+/* ---------------------------------------------------------------- drag the car */
+function steerAim(fx, fy) {
+  const st = car.st, jy = car.jy + drv.off;
+  if (car.y > jy - 30 || !st.b) {
+    let best = null, bd = 1e9; for (const b of blobs) { if (b.state === 'gone' || b.state === 'out') continue; const d = Math.abs(fx - b.bx); if (d < bd) { bd = d; best = b; } }
+    if (best) st.b = best;
+  }
+  const b = st.b; if (!b) return;
+  let lo = 0, hi = 0.96; for (let i = 0; i < 18; i++) { const m = (lo + hi) / 2; if (pathPt(b, m)[1] > fy) lo = m; else hi = m; }
+  st.tt = (lo + hi) / 2 + (fy < pathPt(b, 0.96)[1] ? 0.1 : 0);
+}
+function steerEnd(arrived) {
+  const st = car.st; if (!st || car.mode !== 'steer') return;
+  steer.on = false;
+  if (arrived) {
+    S.canTap = false; S.idle = 0; car.mode = 'go'; car.b = st.b; car.dur = 0.95; car.t0 = T - car.dur * 0.88; Snd.vroom();
+  } else if (st.b && st.t > 0.04) {
+    car.mode = 'back'; car.b = st.b; car.t0 = T - 0.6 * (1 - st.t / 0.96);
+  } else car.mode = 'idle';
+}
+const steer = { on: false, id: null };
 function drawRoads() {
   const jy = car.jy + drv.off;
   const main = () => { ctx.beginPath(); ctx.moveTo(car.hx, H + 20); ctx.lineTo(car.hx, -20); };
@@ -478,9 +550,10 @@ function drawParts(dt) {
 /* ---------------------------------------------------------------- game state */
 const MODEDEF = {
   count: { gen: 'count', kind: 'shoot' }, numbers: { gen: 'numbers', kind: 'shoot' }, add: { gen: 'add', kind: 'shoot' }, letters: { gen: 'letters', kind: 'shoot' },
-  first: { gen: 'first', kind: 'shoot' }, colors: { gen: 'colors', kind: 'shoot' }, drive: { gen: 'drive', kind: 'drive' }, race: { gen: 'race', kind: 'race' }, sub: { gen: 'sub', kind: 'shoot' }, compare: { gen: 'compare', kind: 'shoot' }, clock: { gen: 'clock', kind: 'shoot' }, shapes: { gen: 'shapes', kind: 'shoot' }, pattern: { gen: 'pattern', kind: 'shoot' }, sight: { gen: 'sight', kind: 'shoot' }, syl: { gen: 'syl', kind: 'shoot' }, rhyme: { gen: 'rhyme', kind: 'shoot' }, geo: { gen: 'geo', kind: 'shoot' }, hunt: { gen: 'hunt', kind: 'shoot' }, planets: { gen: 'planets', kind: 'shoot' }, place: { gen: 'place', kind: 'place' }
+  first: { gen: 'first', kind: 'shoot' }, colors: { gen: 'colors', kind: 'shoot' }, drive: { gen: 'drive', kind: 'drive' }, race: { gen: 'race', kind: 'race' }, sub: { gen: 'sub', kind: 'shoot' }, compare: { gen: 'compare', kind: 'shoot' }, clock: { gen: 'clock', kind: 'shoot' }, shapes: { gen: 'shapes', kind: 'shoot' }, pattern: { gen: 'pattern', kind: 'shoot' }, sight: { gen: 'sight', kind: 'shoot' }, syl: { gen: 'syl', kind: 'shoot' }, rhyme: { gen: 'rhyme', kind: 'shoot' }, geo: { gen: 'geo', kind: 'shoot' }, hunt: { gen: 'hunt', kind: 'detect' }, planets: { gen: 'planets', kind: 'shoot' }, place: { gen: 'place', kind: 'place' }
 };
 const car = { x: 0, y: 0, rot: 0, mode: 'wait', b: null, t0: 0, dur: 1, hx: 0, hy: 0, jy: 0, on: false, fx: 0, fy: 0, rot0: 0 };
+const det = { x: 0, y: 0, tx: 0, ty: 0, down: false, moved: 0, sx: 0, sy: 0, open: 0, init: false, touched: false, r: 70 };
 const drv = { pos: 0, spd: 70, off: 0, lt: 0, sl0: 0, sliding: false };
 function kindNow() { return S.screen === 'play' && S.mode && MODEDEF[S.mode] ? MODEDEF[S.mode].kind : 'shoot'; }
 const S = { adv: null, advView: 'intro', advIdx: 0, stNext: null, friendHop: -9, screen: 'splash', mode: null, q: null, tries: 0, canTap: false, done: false, idle: 0, nudged: false, round: null, pendingSticker: false, greeted: false, shotTimer: 0, qid: 0 };
@@ -500,7 +573,15 @@ function applyLang() {
 }
 function renderPips() {
   if (typeof updatePlayBtn === 'function') updatePlayBtn();
-  document.querySelectorAll('.mode').forEach((m) => {
+  window.addEventListener('pointermove', (e) => {
+  if (det.down && kindNow() === 'detect') { det.moved = Math.max(det.moved, Math.hypot(e.clientX - det.sx, e.clientY - det.sy)); det.tx = e.clientX; det.ty = e.clientY - 48; }
+  if (steer.on && car.mode === 'steer' && e.pointerId === steer.id) steerAim(e.clientX, e.clientY);
+});
+['pointerup', 'pointercancel'].forEach((ev) => window.addEventListener(ev, (e) => {
+  if (det.down && kindNow() === 'detect') { det.down = false; if (ev === 'pointerup') detRelease(e); }
+  if (steer.on && e.pointerId === steer.id) steerEnd(false);
+}));
+document.querySelectorAll('.mode').forEach((m) => {
     const lv = save.lv[m.dataset.mode], box = m.querySelector('.pips');
     box.innerHTML = [1, 2, 3].map((i) => `<i class="${i <= lv ? 'on' : ''}"></i>`).join('');
   });
@@ -547,9 +628,9 @@ function newQuestion(keepCount) {
     requestAnimationFrame(() => requestAnimationFrame(() => { if (id !== S.qid) return; layout(); Snd.whoosh(); setTimeout(() => { if (id === S.qid) Voice.say(q.say); }, 350); }));
     return;
   }
-  P.active = false;
+  P.active = false; det.open = 0; det.down = false;
   const colors = shuffle(BLOB_COLORS);
-  blobs = q.opts.map((o, i) => ({ val: o.val, img: o.img || null, label: o.label, say: o.say, color: o.hex || colors[i % colors.length], ph: rnd(0, 6), bx: W / 2, by: H / 2, r: 60, state: 'in', t0: T, delay: 0.1 + i * 0.09, alpha: 1, dim: false, glow: false, blink: 0, nextBlink: T + rnd(1, 4), cx: null, cy: null }));
+  blobs = q.opts.map((o, i) => ({ val: o.val, jx: rnd(-0.07, 0.07) * SW, jy: rnd(-14, 14), img: o.img || null, label: o.label, say: o.say, color: o.hex || colors[i % colors.length], ph: rnd(0, 6), bx: W / 2, by: H / 2, r: 60, state: 'in', t0: T, delay: 0.1 + i * 0.09, alpha: 1, dim: false, glow: false, blink: 0, nextBlink: T + rnd(1, 4), cx: null, cy: null }));
   if (kind === 'drive') { if (!car.on) car.mode = 'wait'; car.b = null; drv.off = -H * 0.8; drv.sliding = true; drv.sl0 = T; }
   requestAnimationFrame(() => requestAnimationFrame(() => {
     if (id !== S.qid) return;
@@ -1393,7 +1474,7 @@ function tickFrame(now) {
   if (kind === 'race') { raceStep(dt); drawRace(); drawParts(dt); return; }
   if (S.screen === 'play') {
     if (kind === 'drive') drawRoads();
-    for (const b of blobs) drawBlob(b);
+    if (kind === 'detect') drawDetect(dt); else for (const b of blobs) drawBlob(b);
     if (kind === 'drive') carStep();
     if (kind === 'shoot' && bubble) {
       bubble.p += dt / 0.42;
@@ -1402,7 +1483,7 @@ function tickFrame(now) {
     S.idle += S.canTap ? dt : 0;
     if (S.canTap && S.idle > 12 && !S.nudged) { S.nudged = true; Voice.say(S.q.say); blobs.forEach((b) => { if (b.state === 'idle') { b.state = 'shake'; b.t0 = T + 0; } }); }
   }
-  if (kind === 'drive') drawCar(); else drawZip();
+  if (kind === 'drive') drawCar(); else if (kind !== 'detect') drawZip();
   drawBubble(); drawFriend(); drawParts(dt);
 }
 
@@ -1413,6 +1494,11 @@ cv.addEventListener('pointerdown', (e) => {
   if (S.screen === 'play' && S.mode === 'race') { raceTap(e.clientX); return; }
   if (S.screen !== 'play' || !S.canTap) return;
   S.idle = 0;
+  if (kindNow() === 'detect') { det.down = true; det.touched = true; det.moved = 0; det.sx = e.clientX; det.sy = e.clientY; det.tx = e.clientX; det.ty = e.clientY - 48; return; }
+  if (kindNow() === 'drive' && car.mode === 'idle' && Math.hypot(e.clientX - car.x, e.clientY - car.y) < 80) {
+    let b0 = null, bd0 = 1e9; for (const b of blobs) { const d = Math.abs(car.x - b.bx); if (d < bd0) { bd0 = d; b0 = b; } }
+    car.mode = 'steer'; car.st = { b: b0, t: 0, tt: 0 }; steer.on = true; steer.id = e.pointerId; return;
+  }
   let best = null, bd = 1e9;
   for (const b of blobs) {
     if (b.state === 'in' || b.state === 'gone' || b.state === 'out') continue;
