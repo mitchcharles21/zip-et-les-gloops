@@ -35,3 +35,5 @@ Les voix dépendent de l'appareil : utilise Safari ou Chrome. La musique et la v
 
 ## Credits
 Flags are from the MIT-licensed [flag-icons](https://github.com/lipis/flag-icons) package. Planet, Moon and Sun pictures are rendered from the public planet surface maps in [threex.planets](https://github.com/jeromeetienne/threex.planets) (NASA-derived textures).
+
+- Canadian province and territory flags: [region-flags](https://github.com/behnam/region-flags) (public domain / Wikimedia Commons sources).

@@ -18,7 +18,7 @@ const PALS = {
 };
 PALS.race = PALS.drive;
 PALS.sub = PALS.add; PALS.compare = PALS.numbers; PALS.clock = PALS.count; PALS.shapes = PALS.colors; PALS.pattern = PALS.numbers; PALS.sight = PALS.letters; PALS.syl = PALS.first; PALS.rhyme = PALS.place;
-PALS.story = PALS.place; PALS.geo = PALS.drive; PALS.hunt = PALS.colors; PALS.planets = PALS.numbers;
+PALS.story = PALS.place; PALS.geo = PALS.drive; PALS.hunt = PALS.colors; PALS.planets = PALS.numbers; PALS.flags = PALS.geo; PALS.flagsca = PALS.geo;
 const pal = PALS.menu.map(hex), palTo = pal.map((c) => c.slice());
 function setPal(name) { PALS[name].map(hex).forEach((c, i) => { palTo[i] = c; }); }
 const BLOB_COLORS = ['#ff7aa8', '#ffc93c', '#46d9a6', '#ff9a4d', '#9b7bff', '#4cc9f0'];
@@ -228,7 +228,18 @@ function drawBlob(b) {
   if ((b.img || b.card) && kindNow() !== 'drive') {
     const im = b.img ? imgFor(b.img) : null, q = r * 0.2;
     ctx.fillStyle = '#fffaf0'; ctx.strokeStyle = INK; ctx.lineWidth = 5; ctx.lineJoin = 'round'; rr(ctx, -r, -r, r * 2, r * 2, q); ctx.fill(); ctx.stroke();
-    if (b.card) { let fs = r * 0.62; ctx.font = `700 ${fs}px Fredoka, 'Arial Rounded MT Bold', sans-serif`; const mw = ctx.measureText(b.label).width, avail = r * 2 - 18; if (mw > avail) { fs *= avail / mw; ctx.font = `700 ${fs}px Fredoka, 'Arial Rounded MT Bold', sans-serif`; } ctx.fillStyle = INK; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(b.label, 0, 2); }
+    if (b.card) {
+      const avail = r * 2 - 18, FN = (s) => `700 ${s}px Fredoka, 'Arial Rounded MT Bold', sans-serif`, toks = String(b.label).split(/(?<=[ \-’])/);
+      let fs = r * 0.62, lines = [b.label];
+      for (; fs > r * 0.26; fs -= r * 0.03) {
+        ctx.font = FN(fs); lines = []; let cur = '';
+        for (const w of toks) { const tr = cur + w; if (cur && ctx.measureText(tr.trimEnd()).width > avail) { lines.push(cur.trimEnd()); cur = w; } else cur = tr; }
+        lines.push(cur.trimEnd());
+        if (lines.length <= 3 && lines.every((l) => ctx.measureText(l).width <= avail) && (lines.length === 1 || fs <= r * 0.5 || lines.length <= 2)) break;
+      }
+      ctx.font = FN(fs); ctx.fillStyle = INK; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      const lh = fs * 1.08; lines.forEach((l, i) => ctx.fillText(l, 0, 2 + (i - (lines.length - 1) / 2) * lh));
+    }
     if (im && im.complete && im.naturalWidth) { ctx.save(); rr(ctx, -r + 5, -r + 5, r * 2 - 10, r * 2 - 10, q * 0.8); ctx.clip(); ctx.drawImage(im, -r + 5, -r + 5, r * 2 - 10, r * 2 - 10); ctx.restore(); }
     if (face === 'happy') { ctx.strokeStyle = '#ffc93c'; ctx.lineWidth = 6; rr(ctx, -r, -r, r * 2, r * 2, q); ctx.stroke(); }
     ctx.restore(); return;
@@ -751,7 +762,7 @@ function drawParts(dt) {
 /* ---------------------------------------------------------------- game state */
 const MODEDEF = {
   count: { gen: 'count', kind: 'shoot' }, numbers: { gen: 'numbers', kind: 'shoot' }, add: { gen: 'add', kind: 'shoot' }, letters: { gen: 'letters', kind: 'shoot' },
-  first: { gen: 'first', kind: 'shoot' }, colors: { gen: 'colors', kind: 'shoot' }, drive: { gen: 'drive', kind: 'drive' }, race: { gen: 'race', kind: 'race' }, sub: { gen: 'sub', kind: 'shoot' }, compare: { gen: 'compare', kind: 'shoot' }, clock: { gen: 'clock', kind: 'shoot' }, shapes: { gen: 'shapes', kind: 'shoot' }, pattern: { gen: 'pattern', kind: 'shoot' }, sight: { gen: 'sight', kind: 'shoot' }, syl: { gen: 'syl', kind: 'shoot' }, rhyme: { gen: 'rhyme', kind: 'shoot' }, geo: { gen: 'geo', kind: 'shoot' }, hunt: { gen: 'hunt', kind: 'detect' }, planets: { gen: 'planets', kind: 'shoot' }, place: { gen: 'place', kind: 'place' }
+  first: { gen: 'first', kind: 'shoot' }, colors: { gen: 'colors', kind: 'shoot' }, drive: { gen: 'drive', kind: 'drive' }, race: { gen: 'race', kind: 'race' }, sub: { gen: 'sub', kind: 'shoot' }, compare: { gen: 'compare', kind: 'shoot' }, clock: { gen: 'clock', kind: 'shoot' }, shapes: { gen: 'shapes', kind: 'shoot' }, pattern: { gen: 'pattern', kind: 'shoot' }, sight: { gen: 'sight', kind: 'shoot' }, syl: { gen: 'syl', kind: 'shoot' }, rhyme: { gen: 'rhyme', kind: 'shoot' }, geo: { gen: 'geo', kind: 'shoot' }, hunt: { gen: 'hunt', kind: 'detect' }, planets: { gen: 'planets', kind: 'shoot' }, flags: { gen: 'flags', kind: 'shoot' }, flagsca: { gen: 'flagsca', kind: 'shoot' }, place: { gen: 'place', kind: 'place' }
 };
 const car = { x: 0, y: 0, rot: 0, mode: 'wait', b: null, t0: 0, dur: 1, hx: 0, hy: 0, jy: 0, on: false, fx: 0, fy: 0, rot0: 0 };
 const det = { x: 0, y: 0, tx: 0, ty: 0, down: false, moved: 0, sx: 0, sy: 0, open: 0, init: false, touched: false, r: 70 };
@@ -1386,28 +1397,39 @@ function storyPage() {
   $('story-dots').innerHTML = s.pages.map((_, i) => `<i class="${i === STORY.page ? 'on' : i < STORY.page ? 'seen' : ''}"></i>`).join('');
   $('sp-prev').style.visibility = STORY.page ? 'visible' : 'hidden';
   $('sp-next').textContent = last ? '❓' : '▶'; $('sp-next').classList.toggle('pulse', last);
-  Snd.whoosh(); setTimeout(narrate, 450);
+  spLabel(); Snd.whoosh(); setTimeout(narrate, 450);
 }
+const SPD = [0.62, 0.78, 0.95], SPD_LBL = { fr: ['🐢 Lent', '🚶 Normal', '🐇 Rapide'], en: ['🐢 Slow', '🚶 Normal', '🐇 Fast'] };
+const spIdx = () => { const v = save.st.sspeed; return v === 0 || v === 1 || v === 2 ? v : 1; };
+function spLabel() { const b = $('sp-speed'); if (b) b.textContent = SPD_LBL[L][spIdx()]; }
 function narrate() {
   if (S.screen !== 'story' || STORY.view !== 'read') return;
   const tk = ++STORY.tk, ws = [...document.querySelectorAll('#story-text .w')]; if (!ws.length) return;
   const text = STORIES[STORY.idx].pages[STORY.page][L], words = text.split(' ');
   const starts = []; { let p = 0; for (const w of words) { starts.push(p); p += w.length + 1; } }
+  const rate = SPD[spIdx()], msc0 = () => (save.st.cal && save.st.cal[L]) || (L === 'fr' ? 68 : 62);
+  const pauseOf = (w) => /[.!?…]["»”’)]*$/.test(w) ? 420 : /[,;:—–]["»”’)]*$/.test(w) ? 240 : 0;
+  const dur = (k) => (words[k].length + 1) * msc0() / rate + pauseOf(words[k]) * Math.sqrt(0.8 / rate);
   const light = (i) => ws.forEach((w, j) => w.classList.toggle('on', j === i));
-  let gotB = false, timerOn = false, i = 0;
+  let timer = 0, bActive = false, ended = false, t0 = 0, started = false;
   const live = () => tk === STORY.tk;
-  const step = (fast) => {
-    if (!live() || gotB) return;
-    light(i); if (i >= ws.length) return;
-    const len = ws[i].textContent.length; i++; setTimeout(() => step(fast), fast ? 100 + 46 * len : 230 + 62 * len);
+  const sched = (k, mult) => {
+    clearTimeout(timer);
+    timer = setTimeout(() => { if (!live() || ended || k + 1 >= ws.length) return; light(k + 1); sched(k + 1, bActive ? 1.8 : 1); }, dur(k) * mult);
   };
-  const startTimer = (fast) => { if (timerOn) return; timerOn = true; step(fast); };
-  if (!Voice.ok || !Snd.voiceOn) { startTimer(false); return; }
-  Voice.say(text, () => { if (live()) light(-1); }, {
-    onstart: () => startTimer(true),
-    onboundary: (ci) => { if (!live()) return; gotB = true; let k = 0; while (k + 1 < starts.length && starts[k + 1] <= ci) k++; light(k); }
+  const begin = () => { if (started || !live()) return; started = true; t0 = performance.now(); light(0); sched(0, bActive ? 1.8 : 1); };
+  const calibrate = () => {
+    if (!t0) return; const real = performance.now() - t0; let est = 0; for (let k = 0; k < words.length; k++) est += dur(k);
+    const r = real / est; if (real < 800 || r < 0.4 || r > 2.5) return;
+    const cur = msc0(); save.st.cal = save.st.cal || {}; save.st.cal[L] = Math.max(35, Math.min(150, Math.round(cur * (1 + (r - 1) * 0.6)))); persist();
+  };
+  if (!Voice.ok || !Snd.voiceOn) { begin(); return; }
+  Voice.say(text, () => { ended = true; clearTimeout(timer); if (live()) { light(-1); if (!bActive) calibrate(); } }, {
+    rate,
+    onstart: () => begin(),
+    onboundary: (ci) => { if (!live() || ended) return; bActive = true; if (!started) begin(); let k = 0; while (k + 1 < starts.length && starts[k + 1] <= ci) k++; light(k); sched(k, 1.8); }
   });
-  setTimeout(() => startTimer(true), 1500);
+  setTimeout(() => begin(), 1500);
 }
 function storyQuiz(qi) {
   STORY.tk++; STORY.qi = qi; STORY.tries = 0; storyView('quiz');
@@ -1447,6 +1469,7 @@ $('story-cards').addEventListener('click', (e) => { const b = e.target.closest('
 $('sp-next').addEventListener('click', () => { Snd.click(); const s = STORIES[STORY.idx]; if (STORY.page < s.pages.length - 1) { STORY.page++; storyPage(); } else { Voice.stop(); storyQuiz(0); } });
 $('sp-prev').addEventListener('click', () => { Snd.click(); if (STORY.page) { STORY.page--; storyPage(); } });
 $('sp-listen').addEventListener('click', () => { Snd.unlock(); Snd.click(); narrate(); });
+$('sp-speed').addEventListener('click', () => { Snd.unlock(); Snd.click(); save.st.sspeed = (spIdx() + 1) % 3; persist(); spLabel(); narrate(); });
 $('story-text').addEventListener('click', (e) => { const w = e.target.closest('.w'); if (!w) return; STORY.tk++; document.querySelectorAll('#story-text .w.on').forEach((x) => x.classList.remove('on')); w.classList.add('on'); Voice.say(w.textContent); setTimeout(() => w.classList.remove('on'), 900); });
 $('sq-opts').addEventListener('click', (e) => { const b = e.target.closest('.sq'); if (b && !b.disabled) storyAnswer(b); });
 $('sq-listen').addEventListener('click', () => { Snd.click(); const q = STORIES[STORY.idx].q[STORY.qi][L]; Voice.say(q.q + ' ' + q.o.map(noEmoji).join(L === 'fr' ? ', ou ' : ', or ')); });
@@ -1483,7 +1506,7 @@ function wPick(cands, used) {
 }
 function genPath() {
   const used = new Set(), steps = [];
-  for (const k of ['math', 'read', 'math', 'read', 'fun']) { const m = wPick(k === 'fun' ? ['drive', 'race', 'colors', 'geo', 'hunt', 'planets', 'story'] : CAT_ORDER[k], used); used.add(m); steps.push(m); }
+  for (const k of ['math', 'read', 'math', 'read', 'fun']) { const m = wPick(k === 'fun' ? ['drive', 'race', 'colors', 'geo', 'hunt', 'planets', 'flags', 'flagsca', 'story'] : CAT_ORDER[k], used); used.add(m); steps.push(m); }
   return steps;
 }
 function ensurePath(force) {

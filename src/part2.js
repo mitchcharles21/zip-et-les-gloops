@@ -27,7 +27,7 @@ const SAVE_KEY = keyOf(prof.act);
 const saveIdx = () => { try { localStorage.setItem(IDX_KEY, JSON.stringify(prof)); } catch (e) { storageOK = false; } };
 const meProf = () => prof.list.find((p) => p.id === prof.act);
 const save = {
-  lang: 'fr', music: true, voice: true, stars: 0, stickers: 0, lv: { count: 1, numbers: 1, add: 1, letters: 1, first: 1, drive: 1, place: 1, colors: 1, race: 1, sub: 1, compare: 1, clock: 1, shapes: 1, pattern: 1, sight: 1, syl: 1, rhyme: 1, geo: 1, hunt: 1, planets: 1 },
+  lang: 'fr', music: true, voice: true, stars: 0, stickers: 0, lv: { count: 1, numbers: 1, add: 1, letters: 1, first: 1, drive: 1, place: 1, colors: 1, race: 1, sub: 1, compare: 1, clock: 1, shapes: 1, pattern: 1, sight: 1, syl: 1, rhyme: 1, geo: 1, hunt: 1, planets: 1, flags: 1, flagsca: 1 },
   st: { right: 0, first: 0, rounds: 0, perfect: 0, best: 0, place: 0, drive: 0, chals: 0, alldays: 0, adv: 0, bought: 0, race: 0, art: 0, stories: 0, paths: 0, mode: {} },
   spent: 0, shop: { owned: {}, eq: { hat: '', glasses: '', zip: 'blue', car: 'red' } },
   ach: {}, day: null, dayStreak: { last: '', n: 0 }, adv: { stop: 0, friends: [] }, acc: {}, path: null, name: ''
@@ -427,7 +427,7 @@ const Voice = (() => {
         utter = u;
         u.lang = L === 'fr' ? 'fr-CA' : 'en-US';
         const v = pickVoice(L); if (v) { u.voice = v; u.lang = v.lang; }
-        u.rate = 0.84; u.pitch = 1.12; u.volume = 1;
+        u.rate = (hooks && hooks.rate) || 0.84; u.pitch = 1.12; u.volume = 1;
         u.onstart = () => { Snd.duck(true); speakBtn.classList.add('talk'); if (hooks && hooks.onstart) hooks.onstart(); };
         if (hooks && hooks.onboundary) u.onboundary = (ev) => { if (ev && (ev.name === undefined || ev.name === 'word')) hooks.onboundary(ev.charIndex | 0); };
         u.onend = () => { if (utter === u) done(); if (cb) cb(); };
