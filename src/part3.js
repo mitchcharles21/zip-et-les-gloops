@@ -449,6 +449,7 @@ const screens = { splash: $('splash'), menu: $('menu'), roundend: $('roundend'),
 function applyLang() {
   document.documentElement.lang = L;
   document.querySelectorAll('[data-i18n]').forEach((el) => { el.textContent = UI[L][el.dataset.i18n]; });
+  document.querySelectorAll('[data-ph]').forEach((el) => { el.placeholder = UI[L][el.dataset.ph]; });
   document.querySelectorAll('[data-i18n-aria]').forEach((el) => { el.setAttribute('aria-label', UI[L][el.dataset.i18nAria]); });
   $('l-fr').setAttribute('aria-pressed', String(L === 'fr')); $('l-en').setAttribute('aria-pressed', String(L === 'en'));
   document.title = L === 'fr' ? 'Zip et les Gloops' : 'Zip & the Gloops';
@@ -562,7 +563,7 @@ function win(x, y, extra) {
   burst(x, y, 14);
   floatText(x, y - 70, '+' + gain + ' ⭐');
   setTimeout(() => Snd.star(), 450);
-  const line = pick(TX[L].praise);
+  const line = nameLine(pick(TX[L].praise));
   setTimeout(() => { Voice.say((extra ? extra + ' ' : '') + line); }, 400);
   addStars(gain); S.round.stars += gain; S.round.n++; if (first) S.round.first++;
   Prog.answer(first);
@@ -601,7 +602,7 @@ function endRound() {
   persist(); renderPips();
   show('roundend');
   const n = r.first >= 7 ? 3 : r.first >= 4 ? 2 : 1;
-  $('re-title').textContent = pick(TX[L].roundTitle);
+  $('re-title').textContent = nameLine(pick(TX[L].roundTitle), true);
   $('re-stars').innerHTML = Array.from({ length: 3 }, (_, i) => `<span style="--i:${i}">${i < n ? '⭐' : '☆'}</span>`).join('');
   $('re-text').textContent = TX[L].roundText(r.first, ROUND_LEN);
   Snd.sticker(); burst(W / 2, H * 0.35, 24);
@@ -818,7 +819,7 @@ function racePass(gt) {
     Snd.good(); Snd.vroom(); burst(x, y, 14); floatText(x, y - 36, '+1 ⭐ 🚀'); addStars(1); Prog.answer(true);
     if (Prog.streak >= 3) setTimeout(() => floatText(x, y - 100, '🔥 ' + Prog.streak), 400);
     setTimeout(() => Snd.star(), 300); setTimeout(() => Prog.check(), 900);
-    Voice.say(pick(TX[L].praise));
+    Voice.say(nameLine(pick(TX[L].praise)));
   } else {
     race.boost = -0.6; Snd.bad(); Prog.miss(); parts.push({ k: 'ring', x, y, vx: 0, vy: 0, g: 0, life: 0.4, max: 0.4, r: 20, c: '#ffd6e0' }); floatText(x, y - 36, '🐌');
     const right = gt.opts.find((z) => z.val === gt.q.ans); Voice.say(RX[L].was(right ? right.say : ''));
@@ -1089,7 +1090,7 @@ function storyAnswer(b) {
     document.querySelectorAll('#sq-opts .sq').forEach((x) => { x.disabled = true; if (x !== b) x.classList.add('dim'); }); b.classList.add('yes');
     Snd.good(); const r = b.getBoundingClientRect(); burst(r.left + r.width / 2, r.top, 16); floatText(r.left + r.width / 2, r.top - 20, '+' + (first ? 2 : 1) + ' ⭐');
     addStars(first ? 2 : 1); Prog.answer(first); persist(); setTimeout(() => Prog.check(), 900);
-    Voice.say(pick(TX[L].praise));
+    Voice.say(nameLine(pick(TX[L].praise)));
     const tk = STORY.idx + ':' + STORY.qi; STORY.cur = tk;
     setTimeout(() => { if (S.screen !== 'story' || STORY.cur !== tk) return; if (STORY.qi + 1 < s.q.length) storyQuiz(STORY.qi + 1); else storyFinish(); }, 2000);
   } else {
@@ -1206,6 +1207,7 @@ $('path-back').addEventListener('click', () => { Snd.click(); goMenu(); });
 
 /* ---------------------------------------------------------------- settings */
 function renderSettings() {
+  if (document.activeElement !== $('st-name')) $('st-name').value = save.name;
   $('st-music').setAttribute('aria-pressed', String(Snd.on)); $('st-voice').setAttribute('aria-pressed', String(Snd.voiceOn));
   $('st-ver').textContent = UI[L].ver + ' ' + APP_VERSION;
 }
@@ -1230,6 +1232,9 @@ $('st-music').addEventListener('click', () => { Snd.unlock(); Snd.setMusic(!Snd.
 $('st-voice').addEventListener('click', () => { Snd.unlock(); const on = !Snd.voiceOn; Snd.setVoice(on); if (!on) Voice.stop(); Snd.click(); renderSettings(); sndSync(); if (on) Voice.say(L === 'fr' ? 'Salut !' : 'Hi!'); });
 $('st-update').addEventListener('click', () => { Snd.click(); checkUpdate(); });
 $('st-claude').addEventListener('click', () => { Snd.unlock(); Snd.click(); if (!Snd.voiceOn) { Snd.setVoice(true); renderSettings(); sndSync(); } Voice.say(UI[L].claude_say); });
+$('st-name').addEventListener('input', (e) => { save.name = e.target.value.replace(/[<>&"]/g, '').trim().slice(0, 12); persist(); });
+$('st-name').addEventListener('keydown', (e) => { if (e.key === 'Enter') e.target.blur(); });
+$('st-name').addEventListener('change', () => { if (save.name) Voice.say(UI[L].hi_name(save.name)); });
 $('st-back').addEventListener('click', () => { Snd.click(); goMenu(); });
 
 function tickFrame(now) {

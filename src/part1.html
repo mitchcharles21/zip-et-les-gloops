@@ -296,7 +296,8 @@ button.chip:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--ink);
 .setrow .tg::after { content: ''; position: absolute; top: 1px; left: 1px; width: 16px; height: 16px; border-radius: 50%; background: #fff; border: 3px solid var(--ink); transform: translateX(0); transition: transform .15s; }
 .setrow[aria-pressed="true"] .tg { background: var(--mint); } .setrow[aria-pressed="true"] .tg::after { transform: translateX(20px); }
 .setnote { margin: 0; font-size: 15px; opacity: .8; text-align: center; min-height: 1.2em; }
-#settingsscr { gap: 12px; }
+.setinp { width: 100%; box-sizing: border-box; font: inherit; font-size: 20px; font-weight: 700; text-align: center; color: var(--ink); background: #fff; border: 3px solid var(--ink); border-radius: 16px; padding: 8px 10px; min-height: 46px; }
+#settingsscr { gap: 12px; } #settingsscr .panel { gap: 8px; max-height: 100%; overflow-y: auto; } #settingsscr .panel h2 { font-size: 28px; } #st-update { font-size: 18px; padding: 8px 12px; min-height: 0; }
 </style>
 
 <canvas id="cv" aria-label="Game scene"></canvas>
@@ -413,6 +414,9 @@ button.chip:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--ink);
 <section class="screen" id="settingsscr" hidden>
   <div class="panel">
     <h2 data-i18n="settings" style="margin:0">Réglages</h2>
+    <div class="setgrp"><b data-i18n="st_name">Prénom</b>
+      <input id="st-name" class="setinp" type="text" maxlength="12" autocomplete="off" autocapitalize="words" spellcheck="false" data-ph="name_ph">
+    </div>
     <div class="setgrp"><b data-i18n="st_sound">Son</b>
       <button type="button" class="setrow" id="st-music" aria-pressed="true"><span class="si">🎵</span><span data-i18n="snd_music">Musique</span><i class="tg"></i></button>
       <button type="button" class="setrow" id="st-voice" aria-pressed="true"><span class="si">🗣️</span><span data-i18n="snd_voice">Voix</span><i class="tg"></i></button>

@@ -15,12 +15,13 @@ const save = {
   lang: 'fr', music: true, voice: true, stars: 0, stickers: 0, lv: { count: 1, numbers: 1, add: 1, letters: 1, first: 1, drive: 1, place: 1, colors: 1, race: 1, sub: 1, compare: 1, clock: 1, shapes: 1, pattern: 1, sight: 1, syl: 1, rhyme: 1, geo: 1, hunt: 1 },
   st: { right: 0, first: 0, rounds: 0, perfect: 0, best: 0, place: 0, drive: 0, chals: 0, alldays: 0, adv: 0, bought: 0, race: 0, art: 0, stories: 0, paths: 0, mode: {} },
   spent: 0, shop: { owned: {}, eq: { hat: '', glasses: '', zip: 'blue', car: 'red' } },
-  ach: {}, day: null, dayStreak: { last: '', n: 0 }, adv: { stop: 0, friends: [] }, acc: {}, path: null
+  ach: {}, day: null, dayStreak: { last: '', n: 0 }, adv: { stop: 0, friends: [] }, acc: {}, path: null, name: ''
 };
 try {
   const d = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null');
   if (d && typeof d === 'object') {
     if (d.lang === 'fr' || d.lang === 'en') save.lang = d.lang;
+    if (typeof d.name === 'string') save.name = d.name.replace(/[<>&"]/g, '').trim().slice(0, 12);
     save.music = d.music !== false; save.voice = d.voice !== false;
     save.stars = Math.max(0, d.stars | 0); save.stickers = Math.max(0, d.stickers | 0);
     if (d.lv) for (const k in save.lv) save.lv[k] = clamp(d.lv[k] | 0 || 1, 1, 3);
@@ -41,6 +42,10 @@ try {
     if (d.adv && typeof d.adv === 'object') { save.adv.stop = clamp(d.adv.stop | 0, 0, 4); if (Array.isArray(d.adv.friends)) save.adv.friends = d.adv.friends.filter((x) => typeof x === 'string'); }
   }
 } catch (e) { /* storage unavailable: play without saving */ }
+function nameLine(line, always) {
+  if (!save.name || (!always && Math.random() > 0.4)) return line;
+  return line.replace(/\s*[!.]\s*$/, '') + ', ' + save.name + ' !';
+}
 const persist = () => { try { localStorage.setItem(SAVE_KEY, JSON.stringify(save)); } catch (e) { /* ignore */ } };
 let L = save.lang;
 
