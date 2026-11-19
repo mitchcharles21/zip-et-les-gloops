@@ -24,7 +24,9 @@ function setPal(name) { PALS[name].map(hex).forEach((c, i) => { palTo[i] = c; })
 const BLOB_COLORS = ['#ff7aa8', '#ffc93c', '#46d9a6', '#ff9a4d', '#9b7bff', '#4cc9f0'];
 
 function resize() {
-  const nd = Math.min(window.devicePixelRatio || 1, 2), nw = window.innerWidth, nh = window.innerHeight;
+  const nw = window.innerWidth, nh = window.innerHeight;
+  /* cap the canvas pixel count: a full-resolution canvas on a big tablet screen can glitch (torn tiles) on weaker GPUs */
+  const nd = Math.max(1, Math.min(window.devicePixelRatio || 1, 2, Math.sqrt(1600000 / (nw * nh))));
   if (nd === dpr && nw === W && nh === H && cv.width) return;
   dpr = nd; W = nw; H = nh;
   cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -1656,7 +1658,7 @@ function renderSettings() {
   { const m = meProf(); $('st-av').textContent = m.av; $('st-pname').textContent = profLabel(m, prof.list.indexOf(m)); }
   $('st-warn').textContent = storageOK ? '' : UI[L].nostore;
   $('st-music').setAttribute('aria-pressed', String(Snd.on)); $('st-voice').setAttribute('aria-pressed', String(Snd.voiceOn));
-  $('st-ver').textContent = UI[L].ver + ' ' + APP_VERSION;
+  $('st-ver').textContent = UI[L].ver + ' ' + APP_VERSION + ' · audio ' + Snd.acState() + ' · voix/voices ' + (Voice.ok ? Voice.count() : 'x');
 }
 function openSettings() { show('settings'); $('st-status').textContent = ''; renderSettings(); }
 async function checkUpdate() {
@@ -1780,6 +1782,9 @@ applyLang(); show('splash'); resize(); Prog.updateBtn(); renderWho();
 }
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { /* canvas text uses Fredoka once loaded */ });
 requestAnimationFrame(frame);
+/* unlock audio on any real touch/click (Firefox on Android only counts pointerup/touchend/click as a gesture) */
+['pointerup', 'touchend', 'click'].forEach((ev) => document.addEventListener(ev, () => { if (Snd.acState() !== 'running') Snd.unlock(); }, { capture: true, passive: true }));
 window.__GLOOPS = { enterGame, prof, openProfEdit, S, save, blobs: () => blobs, fire, GEN, newQuestion, startMode, T: () => T, P, car, SHOP, openShop, Prog, openAdv, advNext, startStop, finishStop, race, startRace, openPath, ensurePath, startPathStep, pathStepDone, openCat, MODE_META, CAT_ORDER, STORY, PAINT, openStories, openPaint, STORIES };
 })();
 </script>
+

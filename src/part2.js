@@ -326,7 +326,7 @@ const Snd = (() => {
       for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
     } catch (e) { ac = null; }
   }
-  function unlock() { init(); if (ac && ac.state === 'suspended') ac.resume(); if (musicOn) startMusic(); try { Voice.prime(); } catch (e) { /* ignore */ } }
+  function unlock() { init(); if (ac && ac.state !== 'running') { try { const p = ac.resume(); if (p && p.catch) p.catch(() => {}); } catch (e) { /* ignore */ } } if (musicOn) startMusic(); try { Voice.prime(); } catch (e) { /* ignore */ } }
   function pluck(m, t, dur, vol, out) {
     const f = mf(m), g = ac.createGain(), g2 = ac.createGain();
     const o = ac.createOscillator(), o2 = ac.createOscillator();
@@ -373,7 +373,7 @@ const Snd = (() => {
   function applyMaster() { if (!ac) return; master.gain.cancelScheduledValues(ac.currentTime); master.gain.setTargetAtTime((musicOn || voiceOn) ? 0.9 : 0, ac.currentTime, 0.03); musicG.gain.cancelScheduledValues(ac.currentTime); musicG.gain.setTargetAtTime(musicOn ? (ducked ? 0.06 : 0.2) : 0, ac.currentTime, 0.03); }
   function Snd_duck(sec) { if (!ac || !musicOn) return; musicG.gain.setTargetAtTime(0.05, ac.currentTime, 0.05); setTimeout(() => { if (!ducked && ac && musicOn) musicG.gain.setTargetAtTime(0.2, ac.currentTime, 0.15); }, sec * 1000); }
   return {
-    unlock,
+    unlock, acState: () => (ac ? ac.state : 'none'),
     get on() { return musicOn; },
     get voiceOn() { return voiceOn; },
     setMusic(on) { musicOn = on; save.music = on; persist(); if (!ac) return; applyMaster(); if (on) startMusic(); else stopMusic(); },
@@ -412,7 +412,7 @@ const Voice = (() => {
   let primed = false, warned = false;
   const warn = () => { if (warned) return; warned = true; Prog.toast('🔇', L === 'fr' ? 'Pas de voix sur cet appareil' : 'No voice on this device', L === 'fr' ? 'Essaie Chrome ou Safari' : 'Try Chrome or Safari'); };
   return {
-    ok, warn,
+    ok, warn, count: () => { try { return (speechSynthesis.getVoices() || []).length; } catch (e) { return 0; } },
     prime() {
       if (!ok || primed) return; primed = true;
       try { const u = new SpeechSynthesisUtterance(' '); u.volume = 0; speechSynthesis.speak(u); } catch (e) { /* ignore */ }
