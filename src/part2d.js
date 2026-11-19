@@ -1,6 +1,6 @@
 
 /* ---------------------------------------------------------------- 1st-grade skills, menu meta, path text */
-const APP_VERSION = '2026-11-18.27';
+const APP_VERSION = '2026-11-18.28';
 const G1 = ['sub', 'compare', 'clock', 'shapes', 'pattern', 'sight', 'syl', 'rhyme'];
 const MODES_G1 = G1;
 const MODES_ALL = MODES7.concat(G1, ['geo', 'hunt', 'planets', 'flags', 'flagsca']);
@@ -280,7 +280,14 @@ const svgDoc = (k, s) => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1
 const artTag = (k, s) => `<span class="art" style="display:inline-block;width:${s}px;height:${s}px;line-height:0">${svgDoc(k, s)}</span>`;
 const IMGS = {};
 function imgFor(k) {
-  if (!IMGS[k]) { const im = new Image(); im.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgDoc(k, 200)); IMGS[k] = im; }
+  /* Pre-rasterise each picture once into a canvas. Drawing an SVG-with-embedded-photo image directly every frame
+     can flicker on some tablets (the browser drops and re-decodes the bitmap); a canvas stays put. */
+  if (!IMGS[k]) {
+    const N = 384, c = document.createElement('canvas'); c.width = N; c.height = N; c.complete = false; c.naturalWidth = 0; IMGS[k] = c;
+    const im = new Image();
+    im.onload = () => { try { c.getContext('2d').drawImage(im, 0, 0, N, N); c.naturalWidth = N; c.complete = true; } catch (e) { IMGS[k] = im; } };
+    im.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgDoc(k, 200));
+  }
   return IMGS[k];
 }
 

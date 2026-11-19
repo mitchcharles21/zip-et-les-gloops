@@ -24,7 +24,9 @@ function setPal(name) { PALS[name].map(hex).forEach((c, i) => { palTo[i] = c; })
 const BLOB_COLORS = ['#ff7aa8', '#ffc93c', '#46d9a6', '#ff9a4d', '#9b7bff', '#4cc9f0'];
 
 function resize() {
-  dpr = Math.min(window.devicePixelRatio || 1, 2); W = window.innerWidth; H = window.innerHeight;
+  const nd = Math.min(window.devicePixelRatio || 1, 2), nw = window.innerWidth, nh = window.innerHeight;
+  if (nd === dpr && nw === W && nh === H && cv.width) return;
+  dpr = nd; W = nw; H = nh;
   cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   SW = Math.min(W, 560); SX = (W - SW) / 2; layout();
 }
