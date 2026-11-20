@@ -1,6 +1,6 @@
 
 /* ---------------------------------------------------------------- 1st-grade skills, menu meta, path text */
-const APP_VERSION = '2026-11-19.29';
+const APP_VERSION = '2026-11-20.30';
 const G1 = ['sub', 'compare', 'clock', 'shapes', 'pattern', 'sight', 'syl', 'rhyme'];
 const MODES_G1 = G1;
 const MODES_ALL = MODES7.concat(G1, ['geo', 'hunt', 'planets', 'flags', 'flagsca']);
@@ -331,7 +331,7 @@ const PL_FACTS = [
   ['Quelle planète est la plus proche du Soleil ?', 'Which planet is closest to the Sun?', 'mercury'], ['Quelle planète est la plus chaude ?', 'Which planet is the hottest?', 'venus'],
   ['Quelle planète est bleue et très loin ?', 'Which planet is blue and very far away?', 'neptune']
 ];
-const SKY = [['sun', 'le Soleil', 'the Sun'], ['moon', 'la Lune', 'the Moon'], ['earth', 'la Terre', 'the Earth'], ['saturn', 'Saturne', 'Saturn']];
+const SKY = [['sun', 'le Soleil', 'the Sun'], ['moon', 'la Lune', 'the Moon'], ['mercury', 'Mercure', 'Mercury'], ['venus', 'Vénus', 'Venus'], ['earth', 'la Terre', 'the Earth'], ['mars', 'Mars', 'Mars'], ['jupiter', 'Jupiter', 'Jupiter'], ['saturn', 'Saturne', 'Saturn'], ['uranus', 'Uranus', 'Uranus'], ['neptune', 'Neptune', 'Neptune']];
 const FR_ORD = ['première', 'deuxième', 'troisième', 'quatrième', 'cinquième', 'sixième', 'septième', 'huitième'];
 const EN_ORD = ['first', 'second', 'third', 'fourth', 'fifth', 'sixth', 'seventh', 'eighth'];
 function solarSvg(hi) {
